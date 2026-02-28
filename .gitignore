@@ -1,3 +1,11 @@
+# exclude private*.py files in root and subdirs
+private*.py
+
+# exclude private.ini files in root and subdirs
+private.ini
+config.ini
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -205,3 +213,14 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# nodejs related stuff. exclude all typical nodejs files and directories, but include package.json and package-lock.json
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+lerna-debug.log
+dist/
+build/
+
