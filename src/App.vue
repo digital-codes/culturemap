@@ -88,7 +88,7 @@ onMounted(() => {
   width: 100%;
   /* height: 100%;*/
   height:100%;
-  max-height: 50vh;
+  max-height: 60vh;
   margin-left: auto;
   margin-right: auto;
   overflow: hidden;

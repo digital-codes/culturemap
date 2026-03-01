@@ -1,6 +1,6 @@
 <template>
-    <div class="card-container" ref="cardContainer">
-        <img :src="cardImage" ref="cardImageRef" class="image"/>
+    <div class="card-container" ref="cardContainer" :style="{ backgroundImage: `url(${props.cardImage})` }">
+    <!-- <img :src="cardImage" ref="cardImageRef" class="image" @load="onImageLoad"/> -->
         <button @click="$emit('close')" class="close">X</button>
     </div>
 </template>
@@ -40,6 +40,10 @@ onMounted(() => {
     display: inline-block;
     height:100%;
     width: 100%;   
+    /* background-image: url("/img/card/3_7d_ovl.png");*/
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: center;
 }
 
 .close {
@@ -50,8 +54,8 @@ onMounted(() => {
     position: absolute;
     top:0;
     left:0;
-    width: 1 rem;
-    height:1 rem;
+    width: 3rem;
+    height:3rem;
     z-index: 20;
 }
 
