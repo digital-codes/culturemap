@@ -2,6 +2,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+from PIL import ImageDraw
 from scipy.spatial import distance
 import os
 import json
@@ -10,9 +11,24 @@ import argparse
 import geopandas as gp
 from shapely.geometry import Point
 
-def get_map_dimensions(map_path):
+def get_map(map_path,square=False):
     with Image.open(map_path) as img:
-        return img.size  # Returns (width, height)
+        if square:
+            # Crop to square
+            min_dim = min(img.size)
+            left = (img.width - min_dim) / 2
+            top = (img.height - min_dim) / 2
+            right = left + min_dim
+            bottom = top + min_dim
+            img = img.crop((left, top, right, bottom))
+        else:
+            img = img.convert("RGB")  # Ensure image is in RGB mode
+
+    #map_width, map_height = img.size
+
+    return img  # Returns (width, height)
+    #map_width, map_height = map_img.size
+    # return img.size  # Returns (width, height)
 
 def distribute_stickers(num_stickers, map_width, map_height, min_distance=20):
     # Generate random positions for stickers
@@ -45,43 +61,36 @@ def distribute_stickers(num_stickers, map_width, map_height, min_distance=20):
     return sticker_positions, sticker_size
 
 
-def plot_stickers(sticker_positions, angles, sticker_paths, sticker_size, map_path, cardBox=False, square=False, output_path="sticker_distribution.png"):
-    map_img = Image.open(map_path)
-    if square:
-        # Crop to square
-        min_dim = min(map_img.size)
-        left = (map_img.width - min_dim) / 2
-        top = (map_img.height - min_dim) / 2
-        right = left + min_dim
-        bottom = top + min_dim
-        map_img = map_img.crop((left, top, right, bottom))
+def plot_stickers(sticker_positions, angles, sticker_paths, sticker_size, map_img, cardBox=False, output_path="sticker_distribution.png"):
     map_width, map_height = map_img.size
-    
-    fig, ax = plt.subplots(figsize=(10, 8))
-    ax.imshow(map_img, extent=(0, map_width, 0, map_height))
-    ax.set_xlim(0, map_width)
-    ax.set_ylim(0, map_height)
-    ax.set_aspect('equal')
-    ax.axis('off')
+    result_img = map_img.copy()
+    draw = ImageDraw.Draw(result_img)
+    bboxes = []
 
     for i, pos in enumerate(sticker_positions):
         sticker_path = sticker_paths[i % len(sticker_paths)]
         try:
-            img = Image.open(sticker_path)
-            img.thumbnail((sticker_size, sticker_size))  # Resize sticker
-            rotated_img = img.rotate(angles[i], expand=True)
-            ax.imshow(rotated_img, extent=(pos[0], pos[0] + sticker_size, pos[1], pos[1] + sticker_size), alpha=0.9)
-            if cardBox:
-                # Draw blue bounding box around sticker
-                rect = Rectangle((pos[0], pos[1]), sticker_size, sticker_size, linewidth=2, edgecolor='blue', facecolor='none')
-                ax.add_patch(rect)
-        except Exception as e:
-            print(f"Error processing sticker {sticker_path}: {e}, index: {i}, position: {pos}")
-            print(f"Error loading image {sticker_path}: {e}")
+            sticker = Image.open(sticker_path)
+            sticker.thumbnail((sticker_size, sticker_size))
+            rotated_sticker = sticker.rotate(angles[i], expand=True)
 
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=200, bbox_inches='tight')
-    plt.close()
+            # Paste the rotated sticker onto the map
+            result_img.paste(rotated_sticker, (int(pos[0]), int(pos[1])), rotated_sticker if rotated_sticker.mode == 'RGBA' else None)
+
+            # Draw blue bounding box
+            bbox = [
+                (pos[0], pos[1]),
+                (pos[0] + sticker_size, pos[1] + sticker_size)
+            ]
+            bboxes.append(bbox) 
+            if cardBox:
+                # Draw blue bounding box
+                draw.rectangle(bbox, outline="blue", width=2)
+        except Exception as e:
+            print(f"Error processing sticker {sticker_path}: {e}")
+
+    result_img.save(output_path)
+    return bboxes
 
 
 def main(args):
@@ -94,6 +103,7 @@ def main(args):
     parser.add_argument("-o", "--output-base", default="stickers", help="Base for generated files (without extension)")
     parser.add_argument("-b", "--bbox", action="store_true", help="card bounding box")
     parser.add_argument("-s", "--square", action="store_true", help="Generate square map")
+    parser.add_argument("-n", "--num-stickers", type=int, default=-1, help="Number of stickers to distribute, -1 for all")
     parsed = parser.parse_args(args)
 
     sticker_dir = parsed.card_dir
@@ -102,21 +112,31 @@ def main(args):
     cardBox = parsed.bbox
     square = parsed.square
     sticker_paths = [os.path.join(sticker_dir, f) for f in os.listdir(sticker_dir)]
+    if parsed.num_stickers != -1:
+        sticker_paths = sticker_paths[:parsed.num_stickers]
     num_stickers = len(sticker_paths)
     print(f"Number of stickers: {num_stickers}")
 
-    map_width, map_height = get_map_dimensions(map_path)
+    map_img = get_map(map_path, square=square)
+    map_width, map_height = map_img.size
     sticker_positions, sticker_size = distribute_stickers(num_stickers, map_width, map_height)
     sticker_angles = [random.uniform(-30, 30) for _ in range(len(sticker_positions))]
-    plot_stickers(sticker_positions, sticker_angles, sticker_paths, sticker_size, map_path, cardBox=cardBox, square=square, output_path=f"{output_base}.png")
+    sticker_boxes = plot_stickers(sticker_positions, sticker_angles, sticker_paths, sticker_size, map_img, cardBox=cardBox, output_path=f"{output_base}.png")
+
+    stickers = []
+    for i,s in enumerate(sticker_paths):
+        sticker_info = {
+            "path": s,
+            "name": os.path.basename(s),
+            "position": sticker_positions[i].tolist(),
+            "angle": sticker_angles[i],
+            "size": int(sticker_size),
+            "bbox": sticker_boxes[i]
+        }
+        stickers.append(sticker_info)
 
     with open(f"{output_base}.json", "w") as f:
-        json.dump({
-            "sticker_paths": sticker_paths,
-            "sticker_positions": sticker_positions.tolist(),
-            "sticker_angles": sticker_angles,
-            "sticker_size": sticker_size
-        }, f, indent=4)
+        json.dump(stickers, f, indent=4)
         
 
     geo_bbox = [49.04091, 8.30584, 48.98788,8.49089]  # [min_lat, min_lon, max_lat, max_lon]
