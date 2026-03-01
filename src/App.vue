@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import StickerMap from './components/StickerMap.vue'
+import StickerCard from './components/StickerCard.vue'
 
 
 const squareMap = "/img/map/stickers_square.png";
@@ -28,7 +29,7 @@ const loadRectangles = async (jsonPath: string) => {
     const data = await response.json();
     const rectangles: Rectangle[] = data.map((rect: any, index: number) => ({
       id: index,
-      name: rect.path || `Rectangle ${index}`,
+      name: `/img/card/${rect.name}` || `Rectangle ${index}`,
       bbox: rect.bbox,
     }));
     console.log(`Loaded ${rectangles.length} rectangles from ${jsonPath}`);
@@ -38,9 +39,21 @@ const loadRectangles = async (jsonPath: string) => {
   }
 };
 
+const currentCard = ref<string | null>(null);
+
 const zoomRequested = (index: number) => {
   console.log('Zoom requested for rectangle:', index);
+  const target = targets.value[index];
+  if (!target || !target.name) {
+    console.error('No target found for index:', index);
+    return;
+  }
+  currentCard.value = target.name;
 };
+
+const clearZoom = () => {
+  currentCard.value = null;
+}
 
 onMounted(() => {
   const windowWidth = window.innerWidth;
@@ -62,10 +75,46 @@ onMounted(() => {
 </script>
 
 <template>
-  <StickerMap :mapImage="mapImage" :rectangles="targets" @rectangle-clicked="zoomRequested"/>
+  <div class="stickerFrame">
+  <StickerCard v-if="currentCard" :cardImage="currentCard" class="stickerCard" @close="clearZoom"/>
+  <StickerMap :mapImage="mapImage" :rectangles="targets" @rectangle-clicked="zoomRequested" class="stickerMap"/>
+  </div>
 </template>
 
 <style scoped>
+
+.stickerFrame {
+  position: relative;
+  width: 100%;
+  /* height: 100%;*/
+  height:100%;
+  max-height: 50vh;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: hidden;
+}
+
+.stickerMap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* height: 100%;*/
+  height:auto;
+  z-index: 1;
+  object-fit: contain;
+}
+
+.stickerCard {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -78,4 +127,6 @@ onMounted(() => {
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #42b883aa);
 }
+
+
 </style>
