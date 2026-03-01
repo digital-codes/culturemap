@@ -76,11 +76,17 @@ onMounted(() => {
 </script>
 
 <template>
+  <h1>Culture Map</h1>
+  <p>Mapping Culture in Karlsruhe</p>
   <div class="stickerFrame">
   <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" 
   @open="zoomRequested" @close="clearZoom" :isSquare="useSquare"
   class="stickerMap"/>
   </div>
+  <hr/>
+  <p>Stay tuned ...</p>
+  
+
 </template>
 
 <style scoped>
