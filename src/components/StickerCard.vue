@@ -1,7 +1,7 @@
 <template>
     <div class="card-container" ref="cardContainer">
         <img :src="cardImage" ref="cardImageRef" class="image"/>
-        <button @click="$emit('close')" class="close">Close</button>
+        <button @click="$emit('close')" class="close">X</button>
     </div>
 </template>
 
@@ -42,7 +42,7 @@ onMounted(() => {
     width: 100%;   
 }
 
-.card-container button {
+.close {
     /* 
     max-width: 100%;
     height: auto;
@@ -50,17 +50,20 @@ onMounted(() => {
     position: absolute;
     top:0;
     left:0;
+    width: 1 rem;
     height:1 rem;
-    width: 100%;
-    margin-left:auto;
-    margin-right:auto;
+    z-index: 20;
 }
 
-.card-container img {
+.image {
     /* 
     max-width: 100%;
     height: auto;
     */
+    height: 100%;
+    width: auto;
+    margin-left:auto;
+    margin-right:auto;
     position: absolute;
     top:0;
     left:0;
