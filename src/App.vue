@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import StickerMap from './components/StickerMap.vue'
-import StickerCard from './components/StickerCard.vue'
-
 
 const squareMap = "/img/map/stickers_square.png";
 const rectMap = "/img/map/stickers_rect.png";
@@ -14,8 +12,10 @@ const mapImage = ref(squareMap);
 interface Rectangle {
   id: number;
   name: string;
-  bbox: [number, number, number, number]; // [x, y, width, height]
+  bbox: [[number, number], [number, number]];
 }
+
+
 
 const targets = ref<Rectangle[]>([]);
 const useSquare = ref(true);
@@ -52,6 +52,7 @@ const zoomRequested = (index: number) => {
 };
 
 const clearZoom = () => {
+  console.log('Clearing zoom, hiding card');
   currentCard.value = null;
 }
 
@@ -76,8 +77,9 @@ onMounted(() => {
 
 <template>
   <div class="stickerFrame">
-  <StickerCard v-if="currentCard" :cardImage="currentCard" class="stickerCard" @close="clearZoom"/>
-  <StickerMap :mapImage="mapImage" :rectangles="targets" @rectangle-clicked="zoomRequested" class="stickerMap"/>
+  <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" 
+  @open="zoomRequested" @close="clearZoom" :isSquare="useSquare"
+  class="stickerMap"/>
   </div>
 </template>
 
@@ -85,10 +87,10 @@ onMounted(() => {
 
 .stickerFrame {
   position: relative;
-  width: 100%;
+  /* width: 100%; */
   /* height: 100%;*/
   height:100%;
-  max-height: 60vh;
+  max-height: 80vh;
   margin-left: auto;
   margin-right: auto;
   overflow: hidden;
