@@ -79,9 +79,9 @@ onMounted(() => {
   <h1>Culture Map</h1>
   <p>Mapping Culture in Karlsruhe</p>
   <div class="stickerFrame">
-  <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" 
-  @open="zoomRequested" @close="clearZoom" :isSquare="useSquare"
-  class="stickerMap"/>
+    <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" 
+    @open="zoomRequested" @close="clearZoom" :isSquare="useSquare"
+    class="stickerMap"/>
   </div>
   <hr/>
   <p>Stay tuned ...</p>
@@ -92,38 +92,17 @@ onMounted(() => {
 <style scoped>
 
 .stickerFrame {
-  position: relative;
-  /* width: 100%; */
-  /* height: 100%;*/
-  height:100%;
-  max-height: 80vh;
+  width:auto;
   margin-left: auto;
   margin-right: auto;
   overflow: hidden;
 }
 
 .stickerMap {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  /* height: 100%;*/
   height:auto;
-  z-index: 1;
-  object-fit: contain;
 }
 
-.stickerCard {
-  position: absolute;
-  top: 0;
-  left: 0;
-  /*
-  transform: translate(-50%, 0);
-  */
-  height: 100%;
-  width: 100%;
-  z-index: 10;
-}
 
 .logo {
   height: 6em;
