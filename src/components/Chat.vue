@@ -1,7 +1,78 @@
+<script setup lang="js">
+import { ref, watch, nextTick } from 'vue';
+
+import { useI18n } from 'vue-i18n';
+const i18n = useI18n();
+
+const messages = ref([]);
+
+const query = ref('');
+
+const sessionId = ref(null);
+const conversationId = ref(null);
+
+watch(i18n.locale, (newLocale) => {
+  console.log('Language changed to:', newLocale);
+  // Optionally, you can also reset the chat or send a system message about the language change
+  messages.value = [];
+  sessionId.value = null;
+  conversationId.value = null;
+});
+
+
+const submit = async () => {
+  // Placeholder for submit logic
+  console.log('Submit button clicked', query.value);
+  try {
+    const response = await fetch('/php/chat.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: query.value,
+        lang: i18n.locale.value,
+        session: sessionId.value,
+        conversation_id: conversationId.value
+      })
+    });
+    const data = await response.json();
+    console.log('Response from server:', data);
+    if (!response.ok) {
+      console.error('Server error:', data.error || response.statusText);
+      throw new Error(data.error || 'Server error');
+    }
+    if (data.error) {
+      throw new Error("Error: " + data.error);
+    }
+    // Update messages and session/conversation IDs based on response
+    if (data.session) {
+      sessionId.value = data.session;
+    }
+    if (data.conversation_id) {
+      conversationId.value = data.conversation_id;
+    }
+    messages.value.push({ type: 'question', text: query.value });
+    messages.value.push({ type: 'answer', text: data.text || 'No response from server.' });
+  } catch (error) {
+    console.error('Error submitting query:', error);
+  }
+  query.value = '';
+  await nextTick();
+  const chatElement = document.querySelector('.chat');
+  if (chatElement) {
+    chatElement.scrollTop = chatElement.scrollHeight;
+  }
+};
+
+
+</script>
+
 <template>
   <div class="chat">
-    <p class="answer">Hello! How can I assist you today?</p>
-    <p class="question">What is this project about?</p>
+    <p v-for="(message, index) in messages" :key="index" :class="message.type">{{ message.text }}</p>
+  </div>
+  <div class="input-area">
+    <input type="text" placeholder="Type your message..." v-model="query" />
+    <button @click="submit" >{{ $t("message.send") }}</button>
   </div>
 </template>
 
@@ -13,7 +84,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0,  0, 0.1);
   overflow:scroll;
-  max-height: 200px;
+  height: 40vh;
 }
 .answer {
   color: var(--color-primary);
@@ -27,4 +98,26 @@
   margin-right: .2rem;
   width:80%;
 }
+
+.input-area {
+  display: flex;
+  gap: .5rem;
+  margin: 1rem auto;
+  width:80%;
+}
+.input-area input {
+  flex: 1;
+  padding: .5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+.input-area button {
+  padding: .5rem 1rem;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 </style>    

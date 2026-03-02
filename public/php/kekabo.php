@@ -54,7 +54,9 @@ function getEvents($start, $end)
             "description" => $event['description'] ?? 'N/A'
         );
     }
-
+    if (!isset($eventList)) {
+        return [];
+    }
     return $eventList;
 }
 

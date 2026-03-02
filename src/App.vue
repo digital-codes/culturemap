@@ -108,6 +108,8 @@ const toggleChat = (enabled: boolean) => {
   if (enabled) {
     // Logic to show the chat component
     console.log('Showing chat component');
+    // clear popover card 
+    clearZoom();
   } else {
     // Logic to hide the chat component
     console.log('Hiding chat component');

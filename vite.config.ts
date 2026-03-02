@@ -13,4 +13,12 @@ export default defineConfig({
       include: resolve(dirname(fileURLToPath(import.meta.url)), './src/locales/**'),
     }),
   ],
+  server: {
+    proxy: {
+      '/php': {
+        target: 'http://localhost:9000/',
+        changeOrigin: true,
+      },
+    },
+  },
 })

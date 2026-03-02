@@ -11,6 +11,7 @@
   --color-text: #213547;
   --color-background: #ffffff;
   --color-surface: #f9f9f9;
+  --color-border: #e0e0e0;
 
   color: var(--color-text);
   background-color: var(--color-background);
@@ -28,6 +29,7 @@
     --color-text: rgba(255, 255, 255, 0.87);
     --color-background: #242424;
     --color-surface: #1a1a1a;
+    --color-border: #333333;
   }
 }
 

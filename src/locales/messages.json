@@ -2,13 +2,15 @@
     "en": {
       "message": {
         "hello": "hello world",
-        "stay tuned": "Stay tuned for more updates!"
+        "stay tuned": "Stay tuned for more updates!",
+        "send": "Send"
         }
     },
     "de": {
       "message": {
         "hello": "Hallo Welt",
-        "stay tuned": "Bleiben Sie dran für weitere Updates!"
+        "stay tuned": "Bleiben Sie dran für weitere Updates!",
+        "send": "Senden"
         }
     }
 }
