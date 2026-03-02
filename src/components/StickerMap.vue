@@ -4,13 +4,13 @@
             ref="mapImageRef" />
         <div v-if="cardImage" class="popover" :style="popoverStyle">
             <button class="close-button" @click="closePopover">X</button>
-            <img :src="cardImage" class="popover-image" />
+            <img :src="cardImage" class="popover-image" ref="cardImageRef" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 
 interface Rectangle {
   bbox: [[number, number], [number, number]];
@@ -37,15 +37,36 @@ const props = defineProps({
 
 });
 
-const emit = defineEmits(["open", "close"]);
+const emit = defineEmits(["open", "close", "next","prev"]);
 
 const container = ref<HTMLElement | null>(null);
 const mapImageRef = ref<HTMLImageElement | null>(null);
+const cardImageRef = ref<HTMLImageElement | null>(null);
 const imageWidth = ref<number>(0);
 const imageHeight = ref<number>(0);
 
+watch (() => props.cardImage, async (newVal) => {
+    if (newVal && isMobile()) {
+        console.log('Adding touch event listeners for mobile');
+        await nextTick(); // Ensure the DOM is updated before adding listeners
+        if (!cardImageRef.value) return; // Double-check ref after DOM update
+        cardImageRef.value.addEventListener('touchstart', handleTouchStart);
+        cardImageRef.value.addEventListener('touchend', handleTouchEnd);
+    } else if (cardImageRef.value) {
+        console.log('Removing touch event listeners');
+        cardImageRef.value.removeEventListener('touchstart', handleTouchStart);
+        cardImageRef.value.removeEventListener('touchend', handleTouchEnd);
+    }
+});
+
 const closePopover = (): void => {
     console.log('Closing popover');
+    /*
+    if (cardImageRef.value && isMobile()) {
+        cardImageRef.value.removeEventListener('touchstart', handleTouchStart);
+        cardImageRef.value.removeEventListener('touchend', handleTouchEnd);
+    }
+    */
     emit('close');
 };
 
@@ -65,6 +86,41 @@ const onImageLoad = () => {
         imageHeight.value = mapImageRef.value.naturalHeight;
         //imageHeight.value = mapImageRef.value.clientHeight;
         console.log('Image loaded with dimensions:', imageWidth.value, imageHeight.value);
+    }
+};
+
+let touchStartX = 0;
+
+const isMobile = (): boolean => {
+    const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    console.log('Is mobile device:', mobile);
+    return mobile;
+};
+
+
+const handleTouchStart = (event: TouchEvent) => {
+    console.log('Touch start detected');
+    if (!event.touches[0]) return;
+    touchStartX = event.touches[0].clientX;
+    console.log('Touch start X:', touchStartX);
+};
+
+const handleTouchEnd = (event: TouchEvent) => {
+    console.log('Touch end detected');  
+    console.log('Touch event details:', event);
+    if (!event.changedTouches[0]) return;
+    const touchEndX = event.changedTouches[0].clientX;
+    console.log('Touch end X:', touchEndX);
+    const diff = touchStartX - touchEndX;
+    const threshold = 50;
+    console.log('Touch start X:', touchStartX, 'Touch end X:', touchEndX, 'Difference:', diff);
+
+    if (diff > threshold) {
+        // Swiped left
+        emit('next');
+    } else if (diff < -threshold) {
+        // Swiped right
+        emit('prev');
     }
 };
 

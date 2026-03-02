@@ -49,9 +49,11 @@ const loadRectangles = async (jsonPath: string) => {
 };
 
 const currentCard = ref<string | null>(null);
+const targetIdx = ref<number>(-1);
 
 const zoomRequested = (index: number) => {
   console.log('Zoom requested for rectangle:', index);
+  targetIdx.value = index;
   const target = targets.value[index];
   if (!target || !target.name) {
     console.error('No target found for index:', index);
@@ -60,10 +62,24 @@ const zoomRequested = (index: number) => {
   currentCard.value = target.name;
 };
 
+
 const clearZoom = () => {
   console.log('Clearing zoom, hiding card');
   currentCard.value = null;
+  targetIdx.value = -1;
 }
+
+const zoomNext = () => {
+  if (targetIdx.value < targets.value.length - 1) {
+    zoomRequested(targetIdx.value + 1);
+  }
+};
+
+const zoomPrev = () => {
+  if (targetIdx.value > 0) {
+    zoomRequested(targetIdx.value - 1);
+  }
+};
 
 onMounted(() => {
   const windowWidth = window.innerWidth;
@@ -127,7 +143,9 @@ const toggleTx = (enabled: boolean) => {
     <Chat v-if="chatEnabled" />
     <div v-else class="stickerFrame">
       <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" @open="zoomRequested"
-        @close="clearZoom" :isSquare="useSquare" class="stickerMap" />
+        @close="clearZoom" 
+        @next="zoomNext" @prev="zoomPrev"
+        :isSquare="useSquare" class="stickerMap" />
     </div>
     <Footer />
   </div>
