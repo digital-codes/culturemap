@@ -8,13 +8,14 @@
                 <li><a href="#" @click="menuActions[2]!.action(); menuOpen = false">About</a></li>
             </ul>
         </nav>
-        <span class="title">Culture</span>
+        <div style="display: flex; align-items: center;width:70%;justify-content: center;">
+        <span class="title right">Culture</span>
         <img :src="logo" alt="Logo" class="logo" />
         <span class="title">Map</span>
+        </div>
         <button @click="tx = !tx" class="tx-toggle">
             {{ tx ? 'EN' : 'DE' }}
         </button>
-
         <button @click="darkMode = !darkMode" class="mode-toggle">
             {{ darkMode ? '☀️' : '🌙' }}
         </button>
@@ -88,10 +89,15 @@ const menuActions = [
 .title {
     font-size: 1.5rem;
     font-weight: bold;
-    width: 20%;
+    width: 40%;
     overflow: clip;
     text-align: left;
 }
+
+.title.right {
+    text-align: right;
+}
+
 
 .logo {
     height: 3em;
@@ -113,8 +119,14 @@ const menuActions = [
     cursor: pointer;
 }
 
+.tx-toggle {
+    margin-right: 1rem;
+    cursor: pointer;
+}
+
 .menu-toggle {
     margin-right: 2rem;
+    margin-left: 2rem;
     cursor: pointer;
 }
 
@@ -142,8 +154,13 @@ const menuActions = [
     margin-right: 1rem;
 }
 
+.tx-toggle {
+    margin-right: .5rem;
+}
+
 .menu-toggle {
     margin-right: 1rem;
+    margin-left: 1rem;
 }
 
 }

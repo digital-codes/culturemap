@@ -66,12 +66,28 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-
 button {
+  border-radius: 6px;
+  border: 1px solid transparent;
+  padding: 0.3em 0.5em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
   background-color: var(--color-surface);
   color: var(--color-text);
   transition: border-color 0.25s, background-color 0.3s;
+  cursor: pointer;
 }
+
+button:hover {
+  border-color: var(--color-primary);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 2px auto -webkit-focus-ring-color;
+}
+
 
 h1 {
   font-size: 2.4rem;
