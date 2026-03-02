@@ -1,7 +1,8 @@
 <?php
 
 
-function getEvents($start, $end) {
+function getEvents($start, $end)
+{
     // Define the base URL of the Gancio instance
     $base_url = "https://keepkarlsruheboring.org";
     // Construct the API URL for fetching events
@@ -18,7 +19,7 @@ function getEvents($start, $end) {
 
     // Check for errors
     if (curl_errno($ch)) {
-        echo 'Curl error: ' . curl_error($ch);
+        //echo 'Curl error: ' . curl_error($ch);
         return [];
     }
 
@@ -27,7 +28,7 @@ function getEvents($start, $end) {
 
     // Check if the request was successful
     if ($events === null) {
-        echo "Failed to fetch events.";
+        //echo "Failed to fetch events.";
         return [];
     }
 
@@ -57,13 +58,19 @@ function getEvents($start, $end) {
     return $eventList;
 }
 
-// Calculate the date range for the next 7 days in Unix timestamps
-$start_timestamp = time();
-$end_timestamp = strtotime('+7 days');
+function test()
+{
+    echo "Test function called!";
+    // Calculate the date range for the next 7 days in Unix timestamps
+    $start_timestamp = time();
+    $end_timestamp = strtotime('+7 days');
 
-$events = getEvents($start_timestamp, $end_timestamp);
+    $events = getEvents($start_timestamp, $end_timestamp);
 
 
-print_r($events);
+    print_r($events);
+}
+
+// test();
 
 ?>
