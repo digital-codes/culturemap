@@ -128,8 +128,8 @@ function processAgentResponse(array $responseData): void {
  * Handle function call from agent
  */
 function handleFunctionCall(array $output, ?string $conversationId): void {
-    echo "Function call detected: {$output['name']}\n";
-    echo "Tool call ID: {$output['tool_call_id']}\n";
+    // echo "Function call detected: {$output['name']}\n";
+    // echo "Tool call ID: {$output['tool_call_id']}\n";
 
     $arguments = json_decode($output['arguments'], true);
 
@@ -143,17 +143,18 @@ function handleFunctionCall(array $output, ?string $conversationId): void {
  */
 function handleGetUpcomingEvents(array $arguments, ?string $conversationId, string $toolCallId): void {
     global $endpoint, $apiKey;
-    
+    /*
     echo "Fetching events for date range:\n";
     echo "Start date: {$arguments['start_date']}\n";
     echo "End date: {$arguments['end_date']}\n\n";
+    */
 
     $timezone = new DateTimeZone('Europe/Berlin');
     $startDateTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', $arguments['start_date'], $timezone) ?: DateTime::createFromFormat('Y-m-d\TH:i:s', $arguments['start_date'], $timezone);
     $endDateTime = DateTime::createFromFormat('Y-m-d\TH:i:sP', $arguments['end_date'], $timezone) ?: DateTime::createFromFormat('Y-m-d\TH:i:s', $arguments['end_date'], $timezone);
 
     if ($startDateTime === false || $endDateTime === false) {
-        echo "Error: Invalid date format in arguments\n";
+        // echo "Error: Invalid date format in arguments\n";
         return;
     }
 
@@ -161,7 +162,7 @@ function handleGetUpcomingEvents(array $arguments, ?string $conversationId, stri
     $endTimestamp = $endDateTime->getTimestamp();
 
     $events = getEvents($startTimestamp, $endTimestamp);
-    echo "Fetched " . count($events) . " events.\n\n";
+    // echo "Fetched " . count($events) . " events.\n\n";
 
     $payload = [
         'inputs' => [
@@ -181,11 +182,11 @@ function handleGetUpcomingEvents(array $arguments, ?string $conversationId, stri
         $url = "$endpoint/$conversationId";
         $response = sendCurlRequest($url, $payload, $apiKey);
         $followUpData = json_decode($response, true);
-
+        /*
         echo "Follow-up Response:\n";
         print_r($followUpData);
         echo "\n";
-
+        */
         processAgentResponse($followUpData);
     }
 }
@@ -193,7 +194,7 @@ function handleGetUpcomingEvents(array $arguments, ?string $conversationId, stri
 /**
  * Handle message output from agent
  */
-function handleMessageOutput(array $output): void {
+function handleMessageOutput(array $output): string {
     $text = '';
 
     if (is_string($output['content'])) {
@@ -203,16 +204,13 @@ function handleMessageOutput(array $output): void {
             if ($content['type'] === 'text') {
                 $text .= $content['text'];
             } elseif ($content['type'] === 'tool_reference' && $content['tool'] === 'web_search') {
-                echo "Web Search Result: {$content['title']}\n";
-                echo "URL: {$content['url']}\n";
+                //echo "Web Search Result: {$content['title']}\n";
+                //echo "URL: {$content['url']}\n";
             }
         }
     }
 
-    if ($text) {
-        echo "Agent Response:\n";
-        echo "$text\n\n";
-    }
+    return $text;
 }
 
 /**
