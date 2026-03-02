@@ -16,30 +16,71 @@ if (file_exists($configFile)) {
     $agentId = 'YOUR_AGENT_ID';
 }
 
-// Initial agent request
 $endpoint = 'https://api.mistral.ai/v1/conversations';
 
-
 /**
- * Send initial request to start a conversation with the agent
+ * Main handler for HTTP requests
  */
-function sendInitialAgentRequest(string $endpoint, array $payload): string {
-    global $agentId, $apiKey;
-    $payload['stream'] = false;
-    $payload['agent_id'] = $agentId;
-    return sendCurlRequest($endpoint, $payload, $apiKey);
+function handleChatRequest(string $query, string $language,?string $conversationId = null): array {
+    
+    if ($conversationId === null) {
+        return sendInitialRequest($query, $language);
+    } else {
+        return sendFollowUpRequest($conversationId, $query);
+    }
 }
 
 /**
- * Send follow-up request to the agent with tool results or new message
+ * Send initial request to start a conversation
  */
-function sendFollowUpAgentRequest(string $conversationId, array $payload): string {
-    global $apiKey;
-    $endpoint = "https://api.mistral.ai/v1/conversations/$conversationId";
-    $payload['stream'] = false;
-    $payload['store'] = true;
-    $payload['handoff_execution'] = 'server';
-    return sendCurlRequest($endpoint, $payload, $apiKey);
+function sendInitialRequest(string $query, string $language): array {
+    global $endpoint, $apiKey, $agentId;
+    
+    $currentDate = date('d.m.Y');
+    $fullQuery = "Heute ist der $currentDate. Die Sprache des Nutzers ist $language. $query";
+    
+    $payload = [
+        'inputs' => [
+            [
+                'role' => 'user',
+                'content' => $fullQuery,
+                'object' => 'entry',
+                'type' => 'message.input'
+            ]
+        ],
+        'stream' => false,
+        'agent_id' => $agentId
+    ];
+    
+    $response = sendCurlRequest($endpoint, $payload, $apiKey);
+    $responseData = json_decode($response, true);
+    
+    processAgentResponse($responseData);
+    
+    return $responseData;
+}
+
+/**
+ * Send follow-up request to existing conversation
+ */
+function sendFollowUpRequest(string $conversationId, string $query): array {
+    global $endpoint, $apiKey;
+    
+    $url = "$endpoint/$conversationId";
+    
+    $payload = [
+        'inputs' => $query,
+        'stream' => false,
+        'store' => true,
+        'handoff_execution' => 'server'
+    ];
+    
+    $response = sendCurlRequest($url, $payload, $apiKey);
+    $responseData = json_decode($response, true);
+    
+    processAgentResponse($responseData);
+    
+    return $responseData;
 }
 
 /**
@@ -52,7 +93,7 @@ function sendCurlRequest(string $url, array $payload, string $apiKey): string {
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json',
-        'Authorization: Bearer ' . $apiKey
+        "Authorization: Bearer $apiKey"
     ]);
 
     $response = curl_exec($ch);
@@ -68,7 +109,6 @@ function sendCurlRequest(string $url, array $payload, string $apiKey): string {
  * Process agent response and handle function calls or message outputs
  */
 function processAgentResponse(array $responseData): void {
-    global $apiKey;
     if (!isset($responseData['outputs'])) {
         return;
     }
@@ -85,10 +125,9 @@ function processAgentResponse(array $responseData): void {
 }
 
 /**
- * Handle function call from agent (e.g., get_upcoming_events)
+ * Handle function call from agent
  */
-function handleFunctionCall(array $output, string $conversationId): void {
-    global $apiKey;
+function handleFunctionCall(array $output, ?string $conversationId): void {
     echo "Function call detected: {$output['name']}\n";
     echo "Tool call ID: {$output['tool_call_id']}\n";
 
@@ -102,8 +141,9 @@ function handleFunctionCall(array $output, string $conversationId): void {
 /**
  * Handle get_upcoming_events function call
  */
-function handleGetUpcomingEvents(array $arguments, string $conversationId, string $toolCallId): void {
-    global $apiKey;
+function handleGetUpcomingEvents(array $arguments, ?string $conversationId, string $toolCallId): void {
+    global $endpoint, $apiKey;
+    
     echo "Fetching events for date range:\n";
     echo "Start date: {$arguments['start_date']}\n";
     echo "End date: {$arguments['end_date']}\n\n";
@@ -123,7 +163,6 @@ function handleGetUpcomingEvents(array $arguments, string $conversationId, strin
     $events = getEvents($startTimestamp, $endTimestamp);
     echo "Fetched " . count($events) . " events.\n\n";
 
-    // Send results back to agent
     $payload = [
         'inputs' => [
             [
@@ -132,18 +171,23 @@ function handleGetUpcomingEvents(array $arguments, string $conversationId, strin
                 'object' => 'entry',
                 'type' => 'function.result'
             ]
-        ]
+        ],
+        'stream' => false,
+        'store' => true,
+        'handoff_execution' => 'server'
     ];
 
-    $response = sendFollowUpAgentRequest($conversationId, $payload);
-    $followUpData = json_decode($response, true);
+    if ($conversationId) {
+        $url = "$endpoint/$conversationId";
+        $response = sendCurlRequest($url, $payload, $apiKey);
+        $followUpData = json_decode($response, true);
 
-    echo "Follow-up Response:\n";
-    print_r($followUpData);
-    echo "\n";
+        echo "Follow-up Response:\n";
+        print_r($followUpData);
+        echo "\n";
 
-    // Process the follow-up response recursively
-    processAgentResponse($followUpData);
+        processAgentResponse($followUpData);
+    }
 }
 
 /**
@@ -171,49 +215,31 @@ function handleMessageOutput(array $output): void {
     }
 }
 
-
-// -----------------------------
-$currentDate = date('d.m.Y');
-$lang = "Deutsch";
-$query = "Heute ist der $currentDate. Die Sprache des Nutzers ist $lang. ";
-$query .= "Am Wochenende soll die Eröffnung der Le Cage Ausstellung sein. wann genau?";
-
-$payload = [
-    'inputs' => [
-        [
-            'role' => 'user',
-            'content' => $query,
-            'object' => 'entry',
-            'type' => 'message.input'
-        ]
-    ],
-    'stream' => false,
-    'agent_id' => $agentId
-];
-
-$response = sendInitialAgentRequest($endpoint, $payload);
-$responseData = json_decode($response, true);
-
-echo "Initial Response:\n";
-print_r($responseData);
-echo "\n--------------------\n";
-
-// Process response
-processAgentResponse($responseData);
-
-// Follow-up query
-$followUpPayload = [
-    'inputs' => 'Ist das eine Tanzveranstaltung?'
-];
-
-$conversationId = $responseData['conversation_id'] ?? null;
-if ($conversationId) {
-    $followUpResponse = sendFollowUpAgentRequest($conversationId, $followUpPayload);
-    $followUpData = json_decode($followUpResponse, true);
-    
-    echo "Follow-up Response:\n";
-    print_r($followUpData);
+/**
+ * Test function for chat functionality
+ */
+function testChat(): void {
+    echo "=== TEST 1: Initial Request ===\n";
+    $response1 = handleChatRequest(
+        "Am Wochenende soll die Eröffnung der Le Cage Ausstellung sein. wann genau?",
+        "Deutsch",
+        null,
+    );
+    print_r($response1);
     echo "\n";
-    
-    processAgentResponse($followUpData);
+
+    $conversationId = $response1['conversation_id'] ?? null;
+
+    if ($conversationId) {
+        echo "=== TEST 2: Follow-up Request ===\n";
+        $response2 = handleChatRequest(
+            "Ist das eine Tanzveranstaltung?",
+            "Deutsch",
+            $conversationId
+        );
+        print_r($response2);
+    }
 }
+
+// Uncomment to run tests
+testChat();
