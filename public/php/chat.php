@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/kekabo.php';
+
 /*
 https://docs.mistral.ai/agents/agents
 
@@ -67,7 +69,8 @@ $lang = "Deutsch";
 
 $query = "Heute ist der $currentDate. ";
 $query .= " Die Sprache des Nutzers ist $lang. ";
-$query .= " Was liegt an am nächsten Wochenende?";
+//$query .= " Was liegt an am nächsten Wochenende?";
+$query .= " Am Wochenende soll die Eröffnung der Le Cage Ausstellung sein. wann genau?";
 //$query .= " Was passiert im Iran?";
 //$query .= " What's up the next two days at the zkm?";
 // $query .= " What are Trump's next plans?";
@@ -116,6 +119,47 @@ Using endpoint https://api.mistral.ai/v1/conversations
 
 $responseData = json_decode($response, true);
 
+// check if the respone is a tool call for get_upcoming_events and if so, extract the events
+// Check if the response contains a function call for get_upcoming_events
+if (isset($responseData['outputs'])) {
+    foreach ($responseData['outputs'] as $output) {
+        if ($output['type'] === 'function.call' && $output['name'] === 'get_upcoming_events') {
+            echo "Function call detected: get_upcoming_events\n";
+            echo "Tool call ID: " . $output['tool_call_id'] . "\n";
+            
+            $arguments = json_decode($output['arguments'], true);
+            echo "Start date: " . $arguments['start_date'] . "\n";
+            echo "End date: " . $arguments['end_date'] . "\n\n";
+            
+            $timezone = new DateTimeZone('Europe/Berlin');
+            $startDateTime = DateTime::createFromFormat('Y-m-d\TH:i:s', $arguments['start_date'], $timezone);
+            $endDateTime = DateTime::createFromFormat('Y-m-d\TH:i:s', $arguments['end_date'], $timezone);
+
+            if ($startDateTime !== false && $endDateTime !== false) {
+                $startTimestamp = $startDateTime->getTimestamp();
+                $endTimestamp = $endDateTime->getTimestamp();
+
+                echo "Start timestamp: " . $startTimestamp . "\n";
+                echo "End timestamp: " . $endTimestamp . "\n\n";
+
+                $events = getEvents($startTimestamp, $endTimestamp);
+                echo "Fetched " . count($events) . " events from getEvents function.\n";
+                print_r($events);
+
+                $response = send_event_list_to_agent($responseData['conversation_id'], $apiKey, $output['tool_call_id'], $events);  
+                print_r($response);
+
+            } else {
+                echo "Error: Invalid date format in arguments\n";
+            }
+
+            // Here you would call your actual function to get events
+            // $events = get_upcoming_events($arguments['start_date'], $arguments['end_date']);
+        }
+    }
+}
+
+
 // Initialize variables
 $concatenatedText = '';
 $webSearchResults = [];
@@ -148,6 +192,44 @@ echo $concatenatedText . "\n\n";
 echo "Web Search Results:\n";
 print_r($webSearchResults);
 
+function send_event_list_to_agent($conv_id, $mistral_api_key, $tool_call_id, $event_list) {
+    $api_url = "https://api.mistral.ai/v1/conversations/" . $conv_id;
+
+    $headers = [
+        'Content-Type: application/json',
+        'Accept: application/json',
+        'Authorization: Bearer ' . $mistral_api_key
+    ];
+
+    $payload = [
+        'inputs' => [
+            [
+                'tool_call_id' => $tool_call_id,
+                'result' => json_encode($event_list),
+                'object' => 'entry',
+                'type' => 'function.result'
+            ]
+        ],
+        'stream' => false,
+        'store' => true,
+        'handoff_execution' => 'server'
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $api_url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+        return ['error' => 'Curl error: ' . curl_error($ch)];
+    }
+
+    return json_decode($response, true);
+}
 
 
 ?>
