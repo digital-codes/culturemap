@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+
+import Header from './components/Header.vue'
+import Footer from './components/Footer.vue'
+import Navbar from './components/Navbar.vue'
+import Chat from './components/Chat.vue'
+
 import StickerMap from './components/StickerMap.vue'
+
+import { useI18n } from 'vue-i18n';
+const i18n = useI18n();
 
 const squareMap = "/img/map/stickers_square.png";
 const rectMap = "/img/map/stickers_rect.png";
@@ -61,38 +70,72 @@ onMounted(() => {
   const windowHeight = window.innerHeight;
   useSquare.value = windowWidth <= windowHeight;
   try {
-  if (useSquare.value) {
-    loadRectangles(squareCards);
-    mapImage.value = squareMap;
-  } else {
-    loadRectangles(rectCards);
-    mapImage.value = rectMap;
-  }
+    if (useSquare.value) {
+      loadRectangles(squareCards);
+      mapImage.value = squareMap;
+    } else {
+      loadRectangles(rectCards);
+      mapImage.value = rectMap;
+    }
   } catch (error) {
     console.error('Error loading rectangles:', error);
   }
 });
 
+const chatEnabled = ref(false);
+
+const toggleChat = (enabled: boolean) => {
+  console.log('Toggling chat, enabled:', enabled);
+
+  chatEnabled.value = enabled;
+
+  if (enabled) {
+    // Logic to show the chat component
+    console.log('Showing chat component');
+  } else {
+    // Logic to hide the chat component
+    console.log('Hiding chat component');
+  }
+  // Implement any additional logic needed when chat is toggled
+};
+
+const translate = ref(false);
+
+const toggleTx = (enabled: boolean) => {
+  console.log('Toggling language, English enabled:', enabled);
+  translate.value = enabled;
+  if (enabled) {
+    // Logic to switch to English
+    console.log('Switching language to English');
+    i18n.locale.value = 'en'
+  } else {
+    // Logic to switch to German
+    console.log('Switching language to German');
+    i18n.locale.value = 'de'
+  }
+  // Implement logic to switch language based on the value of 'enabled'
+  // For example, you could set a reactive variable that controls the language of the app
+};
+
+
 </script>
 
 <template>
-  <h1>Culture Map</h1>
-  <p>Mapping Culture in Karlsruhe</p>
-  <div class="stickerFrame">
-    <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" 
-    @open="zoomRequested" @close="clearZoom" :isSquare="useSquare"
-    class="stickerMap"/>
+  <div class="app">
+    <Navbar @toggleChat="toggleChat" @toggleTx="toggleTx" />
+    <Header />
+    <Chat v-if="chatEnabled" />
+    <div v-else class="stickerFrame">
+      <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" @open="zoomRequested"
+        @close="clearZoom" :isSquare="useSquare" class="stickerMap" />
+    </div>
+    <Footer />
   </div>
-  <hr/>
-  <p>Stay tuned ...</p>
-  
-
 </template>
 
 <style scoped>
-
 .stickerFrame {
-  width:auto;
+  width: auto;
   margin-left: auto;
   margin-right: auto;
   overflow: hidden;
@@ -100,22 +143,6 @@ onMounted(() => {
 
 .stickerMap {
   width: 100%;
-  height:auto;
+  height: auto;
 }
-
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-
-
 </style>

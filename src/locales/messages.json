@@ -1,0 +1,14 @@
+{
+    "en": {
+      "message": {
+        "hello": "hello world",
+        "stay tuned": "Stay tuned for more updates!"
+        }
+    },
+    "de": {
+      "message": {
+        "hello": "Hallo Welt",
+        "stay tuned": "Bleiben Sie dran für weitere Updates!"
+        }
+    }
+}
