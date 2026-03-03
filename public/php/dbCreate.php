@@ -18,7 +18,7 @@ class Database {
             location TEXT NOT NULL,
             geo_lat REAL NOT NULL,
             geo_lng REAL NOT NULL,
-            img TEXT,
+            img TEXT NOT NULL UNIQUE,
             description TEXT
         )";
         $this->db->exec($query);

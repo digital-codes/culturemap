@@ -21,6 +21,8 @@ switch ($method) {
     case 'GET':
         if (isset($_GET['id'])) {
             getEntry($conn, $_GET['id']);
+        } else if (isset($_GET['img'])) {
+            getByImg($conn, $_GET['img']);  
         } else {
             getAllEntries($conn);
         }
@@ -65,6 +67,19 @@ function getAllEntries($conn) {
 function getEntry($conn, $id) {
     $stmt = $conn->prepare("SELECT * FROM entries WHERE id = :id");
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+    $entry = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($entry) {
+        echo json_encode($entry);
+    } else {
+        http_response_code(404);
+        echo json_encode(['error' => 'Entry not found']);
+    }
+}
+
+function getByImg($conn, $img) {
+    $stmt = $conn->prepare("SELECT * FROM entries WHERE img = :img");
+    $stmt->bindParam(':img', $img, PDO::PARAM_STR);
     $stmt->execute();
     $entry = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($entry) {
