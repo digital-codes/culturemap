@@ -206,4 +206,13 @@ const handleMapClick = (event:any) => {
     cursor: pointer;
     z-index: 100;
 }
+
+@media screen and (max-width: 1400px) {
+  .main-image {
+    max-height: 50vh;
+    margin-left: auto;
+    margin-right: auto;
+}
+}
+
 </style>
