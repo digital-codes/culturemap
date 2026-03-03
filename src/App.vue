@@ -5,6 +5,7 @@ import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
 import Navbar from './components/Navbar.vue'
 import Chat from './components/Chat.vue'
+import About from './components/About.vue'
 
 import StickerMap from './components/StickerMap.vue'
 
@@ -134,26 +135,27 @@ onMounted(() => {
 });
 
 const chatEnabled = ref(false);
-
-const toggleChat = (enabled: boolean) => {
-  console.log('Toggling chat, enabled:', enabled);
-
-  chatEnabled.value = enabled;
-
-  if (enabled) {
-    // Logic to show the chat component
-    console.log('Showing chat component');
-    // clear popover card 
-    saveZoom();
-  } else {
-    // Logic to hide the chat component
-    console.log('Hiding chat component');
-    restoreZoom();
-  }
-  // Implement any additional logic needed when chat is toggled
-};
-
+const aboutEnabled = ref(false);
 const translate = ref(false);
+
+const goto = (route: string) => {
+  console.log('Routing to:', route);
+  if (route === "home") {
+    chatEnabled.value = false;
+    aboutEnabled.value = false;
+    restoreZoom();
+  } else if (route === "chat") {
+    chatEnabled.value = true;
+    aboutEnabled.value = false;
+    saveZoom();
+  } else if (route === "about") {
+    chatEnabled.value = false;
+    aboutEnabled.value = true;
+    restoreZoom();
+    // Implement logic to show about page or section
+    console.log('Showing about section');
+  }
+};  
 
 const toggleTx = (enabled: boolean) => {
   console.log('Toggling language, English enabled:', enabled);
@@ -176,10 +178,11 @@ const toggleTx = (enabled: boolean) => {
 
 <template>
   <div class="app">
-    <Navbar @toggleChat="toggleChat" @toggleTx="toggleTx" />
+    <Navbar @toggleTx="toggleTx" @route="goto" />
     <Header />
     <Chat v-if="chatEnabled" />
-    <div v-else class="stickerFrame">
+    <About v-if="aboutEnabled" />
+    <div v-if="!chatEnabled && !aboutEnabled" class="stickerFrame">
       <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" @open="zoomRequested"
         @close="clearZoom" 
         @next="zoomNext" @prev="zoomPrev"

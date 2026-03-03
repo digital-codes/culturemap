@@ -5,7 +5,10 @@
         "stay tuned": "Stay tuned for more updates!",
         "typeYourMessage": "What's on your mind?",
         "send": "Send",
-        "sourceCode": "Source code available on"
+        "sourceCode": "Source code available on",
+        "home": "Home",
+        "chat": "Chat",
+        "about": "About"
         }
     },
     "de": {
@@ -14,7 +17,10 @@
         "stay tuned": "Bleiben Sie dran für weitere Updates!",
         "typeYourMessage": "Was möchtest Du wissen?",
         "send": "Senden",
-        "sourceCode": "Quellcode verfügbar auf"
+        "sourceCode": "Quellcode verfügbar auf",
+        "home": "Startseite",
+        "chat": "Chat",
+        "about": "Über"
         }
     }
 }
