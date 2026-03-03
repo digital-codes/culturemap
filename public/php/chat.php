@@ -73,11 +73,9 @@ if ($query === '') {
 $lang = isset($data['lang']) ? trim((string)$data['lang']) : 'DE';
 
 if ($lang === 'DE' || $lang === 'de' || $lang === 'de-DE') {
-    $lang = 'Deutsch';
-} else if ($lang === 'EN' || $lang === 'en' || $lang === 'en-US') {
-    $lang = 'Englisch';
+    $lang = 'de';
 } else {
-    $lang = 'Deutsch'; // default to German if unrecognized
+    $lang = 'en';
 }
 
 $sessionProvided = $data['session'] ?? null;
@@ -94,10 +92,10 @@ if ($sessionProvided === null) {
 
 if ($isNewSession) {
     // For follow-up messages, you might want to include session info in the query or handle it in your agent code
-    if ($lang === 'Deutsch') {
-        $query = "Heute ist der " . date('d.m.Y') . ". Die Sprache des Benutzers ist " . $lang . ". Die Frage ist: " . $query;
+    if ($lang === 'de') {
+        $query = "Heute ist der " . date('d.m.Y') . " Die Frage ist: " . $query;
     } else {
-        $query = "Today is " . date('F j, Y') . ". The user's language is " . $lang . ". The question is: " . $query;
+        $query = "Today is " . date('F j, Y') . ". The question is: " . $query;
     }
 } 
 
@@ -135,6 +133,7 @@ file_put_contents($logFile, json_encode($existingLogs, JSON_PRETTY_PRINT | JSON_
 try {
     $agentResult = handleHttpChatRequest([
         'query' => $query,
+        "language" => $lang,
         'session_id' => $sessionForAgentHandler,
         'conversation_id' => $conversationId,
         // keep any other fields you support (language, etc.) out unless needed

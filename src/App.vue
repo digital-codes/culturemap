@@ -11,6 +11,23 @@ import StickerMap from './components/StickerMap.vue'
 import { useI18n } from 'vue-i18n';
 const i18n = useI18n();
 
+// ------------------
+import { onServerPrefetch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useChatStore } from './stores/ChatStore'
+
+const chatStore = useChatStore()
+const { messages } = storeToRefs(chatStore)
+
+const loadMessages = async () => {
+  await chatStore.fetchMessages()
+  console.log('Messages loaded:', messages.value)
+}
+onServerPrefetch(loadMessages)
+
+// ------------------
+
+
 const squareMap = "/img/map/stickers_square.png";
 const rectMap = "/img/map/stickers_rect.png";
 const squareCards = "/data/stickers_square.json";
@@ -96,6 +113,8 @@ onMounted(() => {
   } catch (error) {
     console.error('Error loading rectangles:', error);
   }
+  loadMessages()
+
 });
 
 const chatEnabled = ref(false);
