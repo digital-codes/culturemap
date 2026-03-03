@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
@@ -12,18 +12,13 @@ import { useI18n } from 'vue-i18n';
 const i18n = useI18n();
 
 // ------------------
-import { onServerPrefetch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useChatStore } from './stores/ChatStore'
 
 const chatStore = useChatStore()
-const { messages } = storeToRefs(chatStore)
-
-const loadMessages = async () => {
-  await chatStore.fetchMessages()
-  console.log('Messages loaded:', messages.value)
-}
-onServerPrefetch(loadMessages)
+chatStore.clear() // Clear messages on app load to ensure a clean state
+const { allMessages } = storeToRefs(chatStore)
+console.log('Initial messages:', allMessages.value)
 
 // ------------------
 
@@ -71,6 +66,7 @@ const targetIdx = ref<number>(-1);
 const zoomRequested = (index: number) => {
   console.log('Zoom requested for rectangle:', index);
   targetIdx.value = index;
+  chatStore.setId(index); // Update the index in the chat store
   const target = targets.value[index];
   if (!target || !target.name) {
     console.error('No target found for index:', index);
@@ -79,22 +75,43 @@ const zoomRequested = (index: number) => {
   currentCard.value = target.name;
 };
 
+const restoreZoom = async () => {
+  const index = chatStore.getId;
+  if (index === -1) {
+    console.log('No previous zoom to restore');
+    return;
+  }
+  clearZoom(); // Clear current zoom before restoring
+  await nextTick(); // Wait for the DOM to update after clearing zoom
+  zoomRequested(index);
+};
+
 
 const clearZoom = () => {
   console.log('Clearing zoom, hiding card');
   currentCard.value = null;
   targetIdx.value = -1;
+  chatStore.setId(-1); // Clear the index in the chat store as well
+}
+
+
+const saveZoom = () => {
+  console.log('Saving zoom, hiding card');
+  currentCard.value = null;
+  chatStore.setId(targetIdx.value);
 }
 
 const zoomNext = () => {
   if (targetIdx.value < targets.value.length - 1) {
     zoomRequested(targetIdx.value + 1);
+    chatStore.setId(targetIdx.value + 1); // Update the index in the chat store  
   }
 };
 
 const zoomPrev = () => {
   if (targetIdx.value > 0) {
     zoomRequested(targetIdx.value - 1);
+    chatStore.setId(targetIdx.value - 1); // Update the index in the chat store
   }
 };
 
@@ -113,7 +130,6 @@ onMounted(() => {
   } catch (error) {
     console.error('Error loading rectangles:', error);
   }
-  loadMessages()
 
 });
 
@@ -128,10 +144,11 @@ const toggleChat = (enabled: boolean) => {
     // Logic to show the chat component
     console.log('Showing chat component');
     // clear popover card 
-    clearZoom();
+    saveZoom();
   } else {
     // Logic to hide the chat component
     console.log('Hiding chat component');
+    restoreZoom();
   }
   // Implement any additional logic needed when chat is toggled
 };

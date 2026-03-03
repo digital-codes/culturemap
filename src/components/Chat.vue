@@ -4,12 +4,18 @@ import { ref, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 const i18n = useI18n();
 
-const messages = ref([]);
+import { storeToRefs } from 'pinia'
+import { useChatStore } from '../stores/ChatStore'
+
+const chatStore = useChatStore()
+const { messages } = storeToRefs(chatStore)
+
+console.log('Initial messages in Chat.vue:', messages.value)
 
 const query = ref('');
 
-const sessionId = ref(null);
-const conversationId = ref(null);
+const sessionId = ref(chatStore.getSessionId);
+const conversationId = ref(chatStore.getConvId);
 
 watch(i18n.locale, (newLocale) => {
   console.log('Language changed to:', newLocale);
@@ -30,8 +36,8 @@ const submit = async () => {
       body: JSON.stringify({
         query: query.value,
         lang: i18n.locale.value,
-        session: sessionId.value,
-        conversation_id: conversationId.value
+        session: sessionId.value != '' ? sessionId.value : undefined,
+        conversation_id: conversationId.value != '' ? conversationId.value : undefined
       })
     });
     const data = await response.json();
@@ -46,12 +52,14 @@ const submit = async () => {
     // Update messages and session/conversation IDs based on response
     if (data.session) {
       sessionId.value = data.session;
+      chatStore.setSessionId(data.session);
     }
     if (data.conversation_id) {
       conversationId.value = data.conversation_id;
+      chatStore.setConvId(data.conversation_id);
     }
-    messages.value.push({ type: 'question', text: query.value });
-    messages.value.push({ type: 'answer', text: data.text || 'No response from server.' });
+    chatStore.append({ type: 'question', text: query.value });
+    chatStore.append({ type: 'answer', text: data.text || 'No response from server.' });
   } catch (error) {
     console.error('Error submitting query:', error);
   }

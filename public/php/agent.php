@@ -10,10 +10,14 @@ $configFile = file_exists("/var/www/files/culturemap/config.ini")
 if (file_exists($configFile)) {
     $config = parse_ini_file($configFile, true);
     $apiKey = $config['agent']['api_key'] ?? 'YOUR_MISTRAL_API_KEY';
-    $agentId = $config['agent']['agent_id'] ?? 'YOUR_AGENT_ID';
+    $agentIdDe = $config['agent']['agent_id_de'] ?? 'YOUR_AGENT_ID';
+    $agentIdEn = $config['agent']['agent_id_en'] ?? 'YOUR_AGENT_ID';
+    $agentId = $agentIdDe; // Default to German agent; you can switch based on language in the code if needed.
 } else {
     $apiKey = 'YOUR_MISTRAL_API_KEY';
-    $agentId = 'YOUR_AGENT_ID';
+    $agentIdDe = 'YOUR_AGENT_ID';
+    $agentIdEn = 'YOUR_AGENT_ID';
+    $agentId = $agentIdDe; // Default to German agent
 }
 
 $endpoint = 'https://api.mistral.ai/v1/conversations';
@@ -42,8 +46,9 @@ function resultEnvelope(int $error, string $text, int $sessionId = 0, ?string $c
  * - conversation_id (string, optional)
  */
 function handleHttpChatRequest(array $request): array {
+    global $agentIdDe, $agentIdEn, $agentId;
     $query = isset($request['query']) ? trim((string)$request['query']) : '';
-    $language = isset($request['language']) ? (string)$request['language'] : 'Deutsch';
+    $language = isset($request['language']) ? (string)$request['language'] : 'de';
     $sessionId = isset($request['session_id']) ? (int)$request['session_id'] : 0;
 
     // Keep conversation_id separate from session_id.
@@ -61,6 +66,9 @@ function handleHttpChatRequest(array $request): array {
         return resultEnvelope(10, 'Fehlende Eingabe: query ist leer.', $sessionId, $conversationId);
     }
 
+    // Select the appropriate agent based on language
+    global $agentIdDe, $agentIdEn, $agentId;
+    $agentId = ($language === 'en') ? $agentIdEn : $agentIdDe;
 
     $turn = runChatTurn($query, $language, $conversationId);
     if (($turn['error'] ?? 99) !== 0) {
@@ -105,14 +113,11 @@ function runChatTurn(string $query, string $language, ?string $conversationId = 
 function sendInitialRequest(string $query, string $language): array {
     global $endpoint, $apiKey, $agentId;
     
-    $currentDate = date('d.m.Y');
-    $fullQuery = "Heute ist der $currentDate. Die Sprache des Nutzers ist $language. $query";
-    
     $payload = [
         'inputs' => [
             [
                 'role' => 'user',
-                'content' => $fullQuery,
+                'content' => $query,
                 'object' => 'entry',
                 'type' => 'message.input'
             ]
