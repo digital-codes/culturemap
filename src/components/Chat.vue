@@ -79,7 +79,7 @@ const submit = async () => {
     <p v-for="(message, index) in messages" :key="index" :class="message.type">{{ message.text }}</p>
   </div>
   <div class="input-area">
-    <input type="text" placeholder="Type your message..." v-model="query" />
+    <input type="text" :placeholder="$t('message.typeYourMessage')" v-model="query" />
     <button @click="submit" >{{ $t("message.send") }}</button>
   </div>
 </template>
