@@ -9,6 +9,7 @@ import { createPinia } from 'pinia'
 const pinia = createPinia()
 
 const i18n = createI18n({
+  legacy: false,
   locale: 'de',
   fallbackLocale: 'de',
   messages: messages,
