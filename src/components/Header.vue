@@ -1,6 +1,6 @@
 <template>
     <div class="header">
-        <p>Mapping Culture in Karlsruhe</p>
+        <p  v-if="route === 'chat'">Mapping Culture in Karlsruhe</p>
     </div>
 </template>
 
@@ -19,3 +19,13 @@
 }
 
 </style>    
+
+<script setup lang="ts">
+defineProps({
+    route: {
+        type: String,
+        required: true
+    }
+})
+
+</script>

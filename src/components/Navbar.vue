@@ -1,7 +1,7 @@
 <template>
     <div class="navbar">
-        <nav>
-            <button @click="menuOpen = !menuOpen" class="menu-toggle">Menu</button>
+        <nav class="nav">
+            <button @click="menuOpen = !menuOpen" class="menu-toggle"><span class="icon">{{ menuOpen ? 'close' : 'menu' }}</span></button>
             <ul v-if="menuOpen" class="nav-menu">
                 <li><a href="#" @click="menuActions[0]!.action(); menuOpen = false">{{ $t('message.home') }}</a></li>
                 <li><a href="#" @click="menuActions[1]!.action(); menuOpen = false">{{ $t('message.chat') }}</a></li>
@@ -17,7 +17,7 @@
             {{ tx ? 'EN' : 'DE' }}
         </button>
         <button @click="darkMode = !darkMode" class="mode-toggle">
-            {{ darkMode ? '☀️' : '🌙' }}
+            <span class="icon">{{ darkMode ? 'light_mode' : 'dark_mode' }}</span>
         </button>
     </div>
 </template>
@@ -60,6 +60,7 @@ const menuActions = [
 </script>
 
 <style scoped>
+
 .navbar {
     position: fixed;
     top: 0;
@@ -72,6 +73,7 @@ const menuActions = [
     padding: 1rem;
     background-color: var(--color-surface);
     color: var(--color-text);
+    z-index:99;
 }
 
 .nav-menu {
@@ -87,8 +89,9 @@ const menuActions = [
 }
 
 .title {
+    font-family: "Faster One";
     font-size: 1.5rem;
-    font-weight: bold;
+    /* font-weight: bold; */
     width: 40%;
     overflow: clip;
     text-align: left;

@@ -9,6 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource-variable/tektur": "^5.2.7",
+    "@fontsource/audiowide": "^5.2.7",
+    "@fontsource/faster-one": "^5.2.7",
+    "@fontsource/material-icons-round": "^5.2.6",
     "@jsonforms/core": "^3.7.0",
     "@jsonforms/vue": "^3.7.0",
     "@jsonforms/vue-vanilla": "^3.7.0",

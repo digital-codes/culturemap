@@ -118,8 +118,8 @@ function addEntry($conn, $input) {
         }
         $stmt = $conn->prepare("
             INSERT INTO entries
-            (name, url, location, geo_lat, geo_lng, img, description)
-            VALUES (:name, :url, :location, :geo_lat, :geo_lng, :img, :description)
+            (name, url, location, geo_lat, geo_lng, img, description, tags)
+            VALUES (:name, :url, :location, :geo_lat, :geo_lng, :img, :description, :tags)
         ");
         $stmt->bindParam(':name', $input['name']);
         $stmt->bindParam(':url', $input['url']);
@@ -128,6 +128,7 @@ function addEntry($conn, $input) {
         $stmt->bindParam(':geo_lng', $input['geo'][1]);
         $stmt->bindParam(':img', $input['img']);
         $stmt->bindParam(':description', $input['description']);
+        $stmt->bindParam(':tags', $input['tags']);
         $stmt->execute();
         echo json_encode(['id' => $conn->lastInsertId()]);
     } catch (PDOException $e) {
@@ -151,7 +152,8 @@ function updateEntry($conn, $input) {
             geo_lat = :geo_lat,
             geo_lng = :geo_lng,
             img = :img,
-            description = :description
+            description = :description,
+            tags = :tags
             WHERE id = :id
         ");
         $stmt->bindParam(':id', $input['id']);
@@ -162,6 +164,7 @@ function updateEntry($conn, $input) {
         $stmt->bindParam(':geo_lng', $input['geo'][1]);
         $stmt->bindParam(':img', $input['img']);
         $stmt->bindParam(':description', $input['description']);
+        $stmt->bindParam(':tags', $input['tags']);
         $stmt->execute();
         if ($stmt->rowCount() === 0) {
             http_response_code(404);

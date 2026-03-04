@@ -38,7 +38,7 @@ interface Rectangle {
 }
 
 
-
+const currentRoute = ref("home");
 const targets = ref<Rectangle[]>([]);
 const useSquare = ref(true);
 
@@ -140,6 +140,7 @@ const translate = ref(false);
 
 const goto = (route: string) => {
   console.log('Routing to:', route);
+  currentRoute.value = route;
   if (route === "home") {
     chatEnabled.value = false;
     aboutEnabled.value = false;
@@ -179,9 +180,9 @@ const toggleTx = (enabled: boolean) => {
 <template>
   <div class="app">
     <Navbar @toggleTx="toggleTx" @route="goto" />
-    <Header />
+    <Header :route="currentRoute"/>
     <Chat v-if="chatEnabled" />
-    <About v-if="aboutEnabled" />
+    <About v-if="aboutEnabled" :cards="targets.map(card => card.name)"/>
     <div v-if="!chatEnabled && !aboutEnabled" class="stickerFrame">
       <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" @open="zoomRequested"
         @close="clearZoom" 
