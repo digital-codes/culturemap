@@ -224,3 +224,9 @@ lerna-debug.log
 dist/
 build/
 
+# add typical php stuff like vendor directory and composer.lock, but include composer.json
+vendor/
+composer.lock
+public/php/culturemap.sqlite
+public/php/queries.json
+public/php/users.csv
