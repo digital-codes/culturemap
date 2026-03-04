@@ -14,12 +14,13 @@ class Database {
         CREATE TABLE IF NOT EXISTS entries (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            url TEXT NOT NULL,
+            url TEXT,
             location TEXT NOT NULL,
-            geo_lat REAL NOT NULL,
-            geo_lng REAL NOT NULL,
+            geo_lat REAL,
+            geo_lng REAL,
             img TEXT NOT NULL UNIQUE,
-            description TEXT
+            description TEXT not null,
+            tags TEXT
         )";
         $this->db->exec($query);
     }
