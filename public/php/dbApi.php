@@ -16,7 +16,6 @@ if (!isset($input['token']) && in_array($method, ['POST', 'PUT'])) {
     exit;
 }   
 
-
 switch ($method) {
     case 'GET':
         if (isset($_GET['id'])) {
@@ -58,84 +57,147 @@ switch ($method) {
 }
 
 function getAllEntries($conn) {
-    $stmt = $conn->prepare("SELECT * FROM entries");
-    $stmt->execute();
-    $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    echo json_encode($entries);
+    try {
+        $stmt = $conn->prepare("SELECT * FROM entries");
+        $stmt->execute();
+        $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        echo json_encode($entries);
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to fetch entries']);
+    }
 }
 
 function getEntry($conn, $id) {
-    $stmt = $conn->prepare("SELECT * FROM entries WHERE id = :id");
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-    $stmt->execute();
-    $entry = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($entry) {
-        echo json_encode($entry);
-    } else {
-        http_response_code(404);
-        echo json_encode(['error' => 'Entry not found']);
+    try {
+        if (!is_numeric($id)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid ID format']);
+            return;
+        }
+        $stmt = $conn->prepare("SELECT * FROM entries WHERE id = :id");
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $entry = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($entry) {
+            echo json_encode($entry);
+        } else {
+            http_response_code(404);
+            echo json_encode(['error' => 'Entry not found']);
+        }
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to fetch entry']);
     }
 }
 
 function getByImg($conn, $img) {
-    $stmt = $conn->prepare("SELECT * FROM entries WHERE img = :img");
-    $stmt->bindParam(':img', $img, PDO::PARAM_STR);
-    $stmt->execute();
-    $entry = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($entry) {
-        echo json_encode($entry);
-    } else {
-        http_response_code(404);
-        echo json_encode(['error' => 'Entry not found']);
+    try {
+        $stmt = $conn->prepare("SELECT * FROM entries WHERE img = :img");
+        $stmt->bindParam(':img', $img, PDO::PARAM_STR);
+        $stmt->execute();
+        $entry = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($entry) {
+            echo json_encode($entry);
+        } else {
+            http_response_code(404);
+            echo json_encode(['error' => 'Entry not found']);
+        }
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to fetch entry']);
     }
 }
 
 function addEntry($conn, $input) {
-    $stmt = $conn->prepare("
-        INSERT INTO entries
-        (name, url, location, geo_lat, geo_lng, img, description)
-        VALUES (:name, :url, :location, :geo_lat, :geo_lng, :img, :description)
-    ");
-    $stmt->bindParam(':name', $input['name']);
-    $stmt->bindParam(':url', $input['url']);
-    $stmt->bindParam(':location', $input['location']);
-    $stmt->bindParam(':geo_lat', $input['geo'][0]);
-    $stmt->bindParam(':geo_lng', $input['geo'][1]);
-    $stmt->bindParam(':img', $input['img']);
-    $stmt->bindParam(':description', $input['description']);
-    $stmt->execute();
-    echo json_encode(['id' => $conn->lastInsertId()]);
+    try {
+        if (!validateInput($input)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing required fields']);
+            return;
+        }
+        $stmt = $conn->prepare("
+            INSERT INTO entries
+            (name, url, location, geo_lat, geo_lng, img, description)
+            VALUES (:name, :url, :location, :geo_lat, :geo_lng, :img, :description)
+        ");
+        $stmt->bindParam(':name', $input['name']);
+        $stmt->bindParam(':url', $input['url']);
+        $stmt->bindParam(':location', $input['location']);
+        $stmt->bindParam(':geo_lat', $input['geo'][0]);
+        $stmt->bindParam(':geo_lng', $input['geo'][1]);
+        $stmt->bindParam(':img', $input['img']);
+        $stmt->bindParam(':description', $input['description']);
+        $stmt->execute();
+        echo json_encode(['id' => $conn->lastInsertId()]);
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to create entry']);
+    }
 }
 
 function updateEntry($conn, $input) {
-    $stmt = $conn->prepare("
-        UPDATE entries SET
-        name = :name,
-        url = :url,
-        location = :location,
-        geo_lat = :geo_lat,
-        geo_lng = :geo_lng,
-        img = :img,
-        description = :description
-        WHERE id = :id
-    ");
-    $stmt->bindParam(':id', $input['id']);
-    $stmt->bindParam(':name', $input['name']);
-    $stmt->bindParam(':url', $input['url']);
-    $stmt->bindParam(':location', $input['location']);
-    $stmt->bindParam(':geo_lat', $input['geo'][0]);
-    $stmt->bindParam(':geo_lng', $input['geo'][1]);
-    $stmt->bindParam(':img', $input['img']);
-    $stmt->bindParam(':description', $input['description']);
-    $stmt->execute();
-    echo json_encode(['success' => true]);
+    try {
+        if (!isset($input['id'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID is required']);
+            return;
+        }
+        $stmt = $conn->prepare("
+            UPDATE entries SET
+            name = :name,
+            url = :url,
+            location = :location,
+            geo_lat = :geo_lat,
+            geo_lng = :geo_lng,
+            img = :img,
+            description = :description
+            WHERE id = :id
+        ");
+        $stmt->bindParam(':id', $input['id']);
+        $stmt->bindParam(':name', $input['name']);
+        $stmt->bindParam(':url', $input['url']);
+        $stmt->bindParam(':location', $input['location']);
+        $stmt->bindParam(':geo_lat', $input['geo'][0]);
+        $stmt->bindParam(':geo_lng', $input['geo'][1]);
+        $stmt->bindParam(':img', $input['img']);
+        $stmt->bindParam(':description', $input['description']);
+        $stmt->execute();
+        if ($stmt->rowCount() === 0) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Entry not found']);
+        } else {
+            echo json_encode(['success' => true]);
+        }
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to update entry']);
+    }
 }
 
 function deleteEntry($conn, $id) {
-    $stmt = $conn->prepare("DELETE FROM entries WHERE id = :id");
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-    $stmt->execute();
-    echo json_encode(['success' => true]);
+    try {
+        if (!is_numeric($id)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid ID format']);
+            return;
+        }
+        $stmt = $conn->prepare("DELETE FROM entries WHERE id = :id");
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        if ($stmt->rowCount() === 0) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Entry not found']);
+        } else {
+            echo json_encode(['success' => true]);
+        }
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to delete entry']);
+    }
 }
-?>
 
+function validateInput($input) {
+    return isset($input['name'], $input['location'], 
+                 $input['img'], $input['description']);
+}
