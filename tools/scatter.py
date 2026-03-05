@@ -30,11 +30,12 @@ def get_map(map_path,square=False):
     #map_width, map_height = map_img.size
     # return img.size  # Returns (width, height)
 
-def distribute_stickers(num_stickers, map_width, map_height, min_distance=20):
+def distribute_stickers(num_stickers, map_width, map_height):
     # Generate random positions for stickers
     np.random.seed(42)  # For reproducibility
     # Calculate sticker size based on map dimensions and number of stickers
-    sticker_size = min(map_width, map_height) // 12  # Adjust divisor to change sticker size
+    sticker_size = min(map_width, map_height) // 14  # Adjust divisor to change sticker size
+    min_distance = sticker_size * .9  # Minimum distance between stickers based on size
     # positions, shift down by half sticker size to center them
     sticker_positions = np.random.rand(num_stickers, 2) * [map_width - sticker_size, map_height - sticker_size] + sticker_size / 2
 
