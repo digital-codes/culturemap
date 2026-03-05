@@ -227,7 +227,7 @@ function login() {
     // Check if the CSV file exists
     if (!file_exists($csv_file)) {
         http_response_code(500);
-        echo json_encode(array("error" => "Internal server error"));
+        echo json_encode(array("error" => "Internal server error (no csv)"));
         return;
     }
     
