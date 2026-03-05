@@ -124,6 +124,9 @@ const zoomPrev = () => {
 };
 
 onMounted(async () => {
+  // remove token on app load to ensure a clean state, user needs to log in again if they want to edit cards
+  localStorage.removeItem('token');
+  
   const windowWidth = window.innerWidth;
   const windowHeight = window.innerHeight;
   useSquare.value = windowWidth <= windowHeight;

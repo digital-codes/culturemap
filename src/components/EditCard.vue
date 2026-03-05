@@ -31,7 +31,12 @@ const loggedIn = ref(false);
 const token = ref("");
 
 onMounted(async () => {
-    console.log("About component mounted with cards: ", props.cards);
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+        token.value = storedToken;
+        loggedIn.value = true;
+        data_usr.value.validated = true;
+    }
     if (props.cards.length > 0) {
         data_item.value.img = props.cards[0]?.split('/').pop() || "undefined";
         try {
@@ -317,8 +322,13 @@ const onChangeUsr = async (event:any) => {
         console.log("Need loging first, ignoring changes.");
         token.value = "";
         const passkey = data_usr.value.passkey;
+        const user = data_usr.value.username;
         if (passkey === "") {
             return; // ignore
+        }
+        if (user === "") {
+            alert("Please enter a username.");
+            return;
         }
         try {
             const r = await fetch('/php/llamaLogin.php', {
@@ -326,11 +336,12 @@ const onChangeUsr = async (event:any) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ password: passkey, username: "any" })
+                body: JSON.stringify({ password: passkey, username: user })
             })
             if (r.status === 200) {
                 const params = await r.json();
                 token.value = params.token;
+                localStorage.setItem('token', token.value);
                 loggedIn.value = true;
                 data_usr.value.validated = true;
                 data_usr.value.username = "";
@@ -342,6 +353,7 @@ const onChangeUsr = async (event:any) => {
             console.error('Error checking passkey:', r.statusText);
             alert("An error occurred while checking the passkey. Please try again later.");
             token.value = "";
+            localStorage.removeItem('token');
             loggedIn.value = false;
             data_usr.value.validated = false;
             return;
@@ -349,6 +361,10 @@ const onChangeUsr = async (event:any) => {
         catch (error) {
             console.error('Error checking passkey:', error);
             alert("An error occurred while checking the passkey. Please try again later.");
+            token.value = "";
+            localStorage.removeItem('token');
+            loggedIn.value = false;
+            data_usr.value.validated = false;
             return;
         }
     }
@@ -412,6 +428,10 @@ const submit = async () => {
     catch (error) {
         console.error('Error submitting group:', error);
         alert("An error occurred while submitting the group. Please try again later.");
+        token.value = "";
+        localStorage.removeItem('token');
+        loggedIn.value = false;
+        data_usr.value.validated = false;
         return;
     }
 }

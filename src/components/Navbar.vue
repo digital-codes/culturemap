@@ -153,6 +153,7 @@ const menuActions = [
 
     .title {
         font-size: 1.2rem;
+        width:50%;
     }
 
 .mode-toggle {

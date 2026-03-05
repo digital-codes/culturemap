@@ -171,7 +171,9 @@ const handleMapClick = (event:any) => {
 
 .main-image {
     display: block;
-    max-width: 100%;
+    max-height: 66vh;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .main-image.square {

@@ -15,6 +15,8 @@
   --color-primary: #646cff;
   --color-secondary: #535bf2;
   --color-text: #213547;
+  --color-accent: #806010;
+  --color-accent-hover: #a0a020;
   --color-background: #ffffff;
   --color-surface: #f9f9f9;
   --color-border: #e0e0e0;
@@ -36,6 +38,8 @@
     --color-background: #242424;
     --color-surface: #1a1a1a;
     --color-border: #333333;
+    --color-accent: #806010;
+    --color-accent-hover: #80a020;
   }
 }
 
@@ -44,6 +48,8 @@
   --color-text: rgba(255, 255, 255, 0.87);
   --color-background: #242424;
   --color-surface: #1a1a1a;
+  --color-accent: #b09030;
+  --color-accent-hover: #a0ca40;
 }
 
 /* Light mode class override */
@@ -55,11 +61,11 @@
 
 a {
   font-weight: 500;
-  color: var(--color-primary);
+  color: var(--color-accent);
   text-decoration: inherit;
 }
 a:hover {
-  color: var(--color-secondary);
+  color: var(--color-accent-hover);
 }
 
 body {
@@ -157,7 +163,7 @@ add, delete, update, refresh, save, download, upload
     background-color: #ffffff;
   }
   a:hover {
-    color: #747bff;
+    color: var(--color-accent-hover);
   }
   button {
     color: #213547;
