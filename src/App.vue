@@ -149,7 +149,7 @@ onMounted(async () => {
       const cards = await r.json();
       console.log(cards);
       // match cards and rectangley on trailing name part
-      targets.value = targets.value.map((rect, idx) => {
+      targets.value = targets.value.map((rect) => {
         const namePart = rect?.name.split('/').pop();
         const card = cards.find((c: any) => c.img === namePart);
         if (card && rect) {

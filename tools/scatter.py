@@ -13,6 +13,7 @@ from shapely.geometry import Point
 
 def get_map(map_path,square=False):
     with Image.open(map_path) as img:
+        img = img.convert("RGB")  # Ensure image is in RGB mode
         if square:
             # Crop to square
             min_dim = min(img.size)
@@ -21,8 +22,6 @@ def get_map(map_path,square=False):
             right = left + min_dim
             bottom = top + min_dim
             img = img.crop((left, top, right, bottom))
-        else:
-            img = img.convert("RGB")  # Ensure image is in RGB mode
 
     #map_width, map_height = img.size
 
@@ -37,7 +36,7 @@ def distribute_stickers(num_stickers, map_width, map_height):
     sticker_size = min(map_width, map_height) // 14  # Adjust divisor to change sticker size
     min_distance = sticker_size * .9  # Minimum distance between stickers based on size
     # positions, shift down by half sticker size to center them
-    sticker_positions = np.random.rand(num_stickers, 2) * [map_width - sticker_size, map_height - sticker_size] + sticker_size / 2
+    sticker_positions = np.random.rand(num_stickers, 2) * [map_width - sticker_size, map_height - sticker_size] + sticker_size / 4
 
     # Function to ensure stickers are not overlapping more than 10%
     def adjust_positions(positions, min_distance):
@@ -46,12 +45,12 @@ def distribute_stickers(num_stickers, map_width, map_height):
                 if i > 0:
                     distances = distance.cdist([positions[i]], positions[:i], 'euclidean')
                     if np.any(distances < 0.9 * min_distance):
-                        positions[i] = np.random.rand(2) * [map_width, map_height]
+                        positions[i] = np.random.rand(2) * [map_width - sticker_size, map_height - sticker_size] + sticker_size / 4
                         continue
                 if i < len(positions) - 1:
                     distances = distance.cdist([positions[i]], positions[i+1:], 'euclidean')
                     if np.any(distances < 0.9 * min_distance):
-                        positions[i] = np.random.rand(2) * [map_width, map_height]
+                        positions[i] = np.random.rand(2) * [map_width - sticker_size, map_height - sticker_size] + sticker_size / 4
                         continue
                 break
         return positions
