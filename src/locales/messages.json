@@ -9,6 +9,7 @@
         "home": "Home",
         "chat": "Chat",
         "about": "About",
+        "edit": "Edit",
         "username": "User",
         "passkey": "Password",
         "login": "Login",
@@ -38,6 +39,7 @@
           "cooking": "Cooking",
           "crafts": "Crafts",
           "dancing": "Dancing",
+          "health": "Health",
           "gaming": "Gaming",
           "writing": "Writing",
           "general_interest": "General"
@@ -53,6 +55,7 @@
         "home": "Start",
         "chat": "Chat",
         "about": "Über",
+        "edit": "Bearbeiten",
         "username": "Benutzer",
         "passkey": "Passwort",
         "login": "Anmelden",
@@ -82,6 +85,7 @@
           "cooking": "Kochen",
           "crafts": "Handwerk",
           "dancing": "Tanzen",
+          "health": "Gesundheit",
           "gaming": "Spielen",
           "writing": "Schreiben",
           "general_interest": "Allgemein"

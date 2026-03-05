@@ -6,6 +6,7 @@
                 <li><a href="#" @click="menuActions[0]!.action(); menuOpen = false">{{ $t('message.home') }}</a></li>
                 <li><a href="#" @click="menuActions[1]!.action(); menuOpen = false">{{ $t('message.chat') }}</a></li>
                 <li><a href="#" @click="menuActions[2]!.action(); menuOpen = false">{{ $t('message.about') }}</a></li>
+                <li><a href="#" @click="menuActions[3]!.action(); menuOpen = false">{{ $t('message.edit') }}</a></li>
             </ul>
         </nav>
         <div style="display: flex; align-items: center;width:70%;justify-content: center;">
@@ -54,6 +55,7 @@ const menuActions = [
     { name: 'Home', action: () => { console.log('Home clicked'); emit("route", "home"); chatMode.value = false; } },
     { name: 'Chat', action: () => { console.log('Chat clicked'); emit("route", "chat"); chatMode.value = true; } },
     { name: 'About', action: () => { console.log('About clicked'); emit("route", "about"); chatMode.value = false; } },
+    { name: 'Edit', action: () => { console.log('Edit clicked'); emit("route", "edit"); chatMode.value = false; } },
 ];
 
 

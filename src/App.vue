@@ -6,6 +6,7 @@ import Footer from './components/Footer.vue'
 import Navbar from './components/Navbar.vue'
 import Chat from './components/Chat.vue'
 import About from './components/About.vue'
+import EditCard from './components/EditCard.vue'
 
 import StickerMap from './components/StickerMap.vue'
 
@@ -35,12 +36,17 @@ interface Rectangle {
   id: number;
   name: string;
   bbox: [[number, number], [number, number]];
+  identifier: string | undefined; // Add identifier property
+  description: string | undefined; // Add description property
 }
 
 
 const currentRoute = ref("home");
 const targets = ref<Rectangle[]>([]);
 const useSquare = ref(true);
+const translate = ref(false);
+
+// ---------------------------------
 
 const loadRectangles = async (jsonPath: string) => {
   try {
@@ -69,6 +75,7 @@ const zoomRequested = (index: number) => {
   targetIdx.value = index;
   chatStore.setId(index); // Update the index in the chat store
   const target = targets.value[index];
+  console.log('Target details:', target);
   if (!target || !target.name) {
     console.error('No target found for index:', index);
     return;
@@ -116,47 +123,65 @@ const zoomPrev = () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   const windowWidth = window.innerWidth;
   const windowHeight = window.innerHeight;
   useSquare.value = windowWidth <= windowHeight;
   try {
     if (useSquare.value) {
-      loadRectangles(squareCards);
+      await loadRectangles(squareCards);
       mapImage.value = squareMap;
     } else {
-      loadRectangles(rectCards);
+      await loadRectangles(rectCards);
       mapImage.value = rectMap;
     }
   } catch (error) {
     console.error('Error loading rectangles:', error);
   }
+  // try to load descriptions from server next
+  try {
+    const r = await fetch(`/php/dbApi.php`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    if (r.status === 200) {
+      const cards = await r.json();
+      console.log(cards);
+      // match cards and rectangley on trailing name part
+      targets.value = targets.value.map((rect, idx) => {
+        const namePart = rect?.name.split('/').pop();
+        const card = cards.find((c: any) => c.img === namePart);
+        if (card && rect) {
+          console.log(`Found match for rectangle ${namePart}:`, card);
+          return { ...rect, identifier: card.name, description: card.description };
+        }
+        return rect;
+      });
+    } else {
+      console.error('Failed to load card descriptions from server:', r.statusText);
+    }
+  } catch (error) {
+    console.error('Error fetching card descriptions:', error);
+  }
 
 });
-
-const chatEnabled = ref(false);
-const aboutEnabled = ref(false);
-const translate = ref(false);
 
 const goto = (route: string) => {
   console.log('Routing to:', route);
   currentRoute.value = route;
   if (route === "home") {
-    chatEnabled.value = false;
-    aboutEnabled.value = false;
     restoreZoom();
   } else if (route === "chat") {
-    chatEnabled.value = true;
-    aboutEnabled.value = false;
     saveZoom();
   } else if (route === "about") {
-    chatEnabled.value = false;
-    aboutEnabled.value = true;
     restoreZoom();
-    // Implement logic to show about page or section
     console.log('Showing about section');
+  } else if (route === "edit") {
+    restoreZoom();
+    console.log('Showing edit section');
   }
-};  
+};
 
 const toggleTx = (enabled: boolean) => {
   console.log('Toggling language, English enabled:', enabled);
@@ -180,14 +205,17 @@ const toggleTx = (enabled: boolean) => {
 <template>
   <div class="app">
     <Navbar @toggleTx="toggleTx" @route="goto" />
-    <Header :route="currentRoute"/>
-    <Chat v-if="chatEnabled" />
-    <About v-if="aboutEnabled" :cards="targets.map(card => card.name)"/>
-    <div v-if="!chatEnabled && !aboutEnabled" class="stickerFrame">
+    <Header :route="currentRoute" />
+    <Chat v-if="currentRoute === 'chat'" />
+    <EditCard v-if="currentRoute === 'edit'" :cards="targets.map(card => card.name)" />
+    <About v-if="currentRoute === 'about'" />
+    <div v-if="currentRoute === 'home'" class="stickerFrame">
       <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" @open="zoomRequested"
-        @close="clearZoom" 
-        @next="zoomNext" @prev="zoomPrev"
-        :isSquare="useSquare" class="stickerMap" />
+        @close="clearZoom" @next="zoomNext" @prev="zoomPrev" :isSquare="useSquare" class="stickerMap" />
+    </div>
+    <div v-if="targetIdx !== -1">
+      <span v-if="targets[targetIdx]?.identifier">{{ targets[targetIdx]?.identifier }}:&nbsp;</span>
+      <span v-if="targets[targetIdx]?.description">{{ targets[targetIdx]?.description }}</span>
     </div>
     <Footer />
   </div>
