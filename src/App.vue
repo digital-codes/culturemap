@@ -227,6 +227,17 @@ const toggleTx = (enabled: boolean) => {
 </template>
 
 <style scoped>
+/* Push all route content below the fixed navbar (3rem tall) */
+#main-content {
+  padding-top: 3rem;
+}
+
+@media screen and (max-width: 600px) {
+  #main-content {
+    padding-top: 2rem;
+  }
+}
+
 .stickerFrame {
   width: auto;
   margin-left: auto;
