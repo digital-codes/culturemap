@@ -1,24 +1,32 @@
 <template>
     <div class="navbar">
-        <nav class="nav">
-            <button @click="menuOpen = !menuOpen" class="menu-toggle"><span class="icon">{{ menuOpen ? 'close' : 'menu' }}</span></button>
-            <ul v-if="menuOpen" class="nav-menu">
-                <li><a href="#" @click="menuActions[0]!.action(); menuOpen = false">{{ $t('message.home') }}</a></li>
-                <li><a href="#" @click="menuActions[1]!.action(); menuOpen = false">{{ $t('message.chat') }}</a></li>
-                <li><a href="#" @click="menuActions[2]!.action(); menuOpen = false">{{ $t('message.about') }}</a></li>
-                <li><a href="#" @click="menuActions[3]!.action(); menuOpen = false">{{ $t('message.edit') }}</a></li>
+        <nav class="nav" aria-label="Main navigation">
+            <button
+              @click="menuOpen = !menuOpen"
+              class="menu-toggle"
+              :aria-expanded="menuOpen"
+              aria-controls="nav-menu"
+              :aria-label="menuOpen ? $t('message.closeMenu') : $t('message.openMenu')"
+            >
+              <span class="icon" aria-hidden="true">{{ menuOpen ? 'close' : 'menu' }}</span>
+            </button>
+            <ul v-if="menuOpen" id="nav-menu" class="nav-menu">
+                <li><button @click="menuActions[0]!.action(); menuOpen = false">{{ $t('message.home') }}</button></li>
+                <li><button @click="menuActions[1]!.action(); menuOpen = false">{{ $t('message.chat') }}</button></li>
+                <li><button @click="menuActions[2]!.action(); menuOpen = false">{{ $t('message.about') }}</button></li>
+                <li><button @click="menuActions[3]!.action(); menuOpen = false">{{ $t('message.edit') }}</button></li>
             </ul>
         </nav>
-        <div style="display: flex; align-items: center;width:70%;justify-content: center;">
+        <div style="display: flex; align-items: center;width:70%;justify-content: center;" aria-hidden="true">
         <span class="title right">Culture</span>
-        <img :src="logo" alt="Logo" class="logo" />
+        <img :src="logo" alt="Culture Map Karlsruhe logo" class="logo" />
         <span class="title">Map</span>
         </div>
-        <button @click="tx = !tx" class="tx-toggle">
+        <button @click="tx = !tx" class="tx-toggle" :aria-label="tx ? $t('message.switchToDe') : $t('message.switchToEn')" :aria-pressed="tx">
             {{ tx ? 'EN' : 'DE' }}
         </button>
-        <button @click="darkMode = !darkMode" class="mode-toggle">
-            <span class="icon">{{ darkMode ? 'light_mode' : 'dark_mode' }}</span>
+        <button @click="darkMode = !darkMode" class="mode-toggle" :aria-label="darkMode ? $t('message.switchToLight') : $t('message.switchToDark')" :aria-pressed="darkMode">
+            <span class="icon" aria-hidden="true">{{ darkMode ? 'light_mode' : 'dark_mode' }}</span>
         </button>
     </div>
 </template>
@@ -88,6 +96,16 @@ const menuActions = [
     background-color: var(--color-surface);
     width: 30%;
     padding: 1rem;
+}
+
+.nav-menu button {
+    background: none;
+    border: none;
+    color: var(--color-text);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    text-decoration: underline;
 }
 
 .title {

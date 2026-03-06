@@ -198,8 +198,8 @@ const toggleTx = (enabled: boolean) => {
     console.log('Switching language to German');
     i18n.locale.value = 'de'
   }
-  // Implement logic to switch language based on the value of 'enabled'
-  // For example, you could set a reactive variable that controls the language of the app
+  // Update the html lang attribute to reflect the current language
+  document.documentElement.lang = i18n.locale.value;
 };
 
 
@@ -209,22 +209,35 @@ const toggleTx = (enabled: boolean) => {
   <div class="app">
     <Navbar @toggleTx="toggleTx" @route="goto" />
     <Header :route="currentRoute" />
-    <Chat v-if="currentRoute === 'chat'" />
-    <EditCard v-if="currentRoute === 'edit'" :cards="targets.map(card => card.name)" />
-    <About v-if="currentRoute === 'about'" />
-    <div v-if="currentRoute === 'home'" class="stickerFrame">
-      <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" @open="zoomRequested"
-        @close="clearZoom" @next="zoomNext" @prev="zoomPrev" :isSquare="useSquare" class="stickerMap" />
-    </div>
-    <div v-if="targetIdx !== -1">
-      <span v-if="targets[targetIdx]?.identifier">{{ targets[targetIdx]?.identifier }}:&nbsp;</span>
-      <span v-if="targets[targetIdx]?.description">{{ targets[targetIdx]?.description }}</span>
-    </div>
+    <main id="main-content">
+      <Chat v-if="currentRoute === 'chat'" />
+      <EditCard v-if="currentRoute === 'edit'" :cards="targets.map(card => card.name)" />
+      <About v-if="currentRoute === 'about'" />
+      <div v-if="currentRoute === 'home'" class="stickerFrame">
+        <StickerMap :mapImage="mapImage" :cardImage="currentCard" :rectangles="targets" @open="zoomRequested"
+          @close="clearZoom" @next="zoomNext" @prev="zoomPrev" :isSquare="useSquare" class="stickerMap" />
+      </div>
+      <div v-if="targetIdx !== -1" class="card-info" aria-live="polite" aria-atomic="true">
+        <span v-if="targets[targetIdx]?.identifier">{{ targets[targetIdx]?.identifier }}:&nbsp;</span>
+        <span v-if="targets[targetIdx]?.description">{{ targets[targetIdx]?.description }}</span>
+      </div>
+    </main>
     <Footer />
   </div>
 </template>
 
 <style scoped>
+/* Push all route content below the fixed navbar (3rem tall) */
+#main-content {
+  padding-top: 3rem;
+}
+
+@media screen and (max-width: 600px) {
+  #main-content {
+    padding-top: 2rem;
+  }
+}
+
 .stickerFrame {
   width: auto;
   margin-left: auto;
