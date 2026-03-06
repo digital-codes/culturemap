@@ -1,6 +1,6 @@
 <template>
-    <header class="header">
-        <h1 v-if="route === 'chat'">Mapping Culture in Karlsruhe</h1>
+    <header v-if="route === 'chat'" class="header">
+        <h2>Mapping Culture in Karlsruhe</h2>
     </header>
 </template>
 
