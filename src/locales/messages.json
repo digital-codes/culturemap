@@ -6,16 +6,29 @@
         "typeYourMessage": "What's on your mind?",
         "send": "Send",
         "sourceCode": "Source code",
+        "sourceCodeLink": "View source code on GitHub (opens in a new tab)",
         "home": "Home",
         "chat": "Chat",
         "about": "About",
+        "aboutHeading": "About this project",
         "edit": "Edit",
         "username": "User",
         "passkey": "Password",
         "login": "Login",
         "logout": "Logout",
         "welcome": "Welcome to the Culture Map!",
-        "bot": "Bot"
+        "bot": "Bot",
+        "openMenu": "Open navigation menu",
+        "closeMenu": "Close navigation menu",
+        "switchToEn": "Switch language to English",
+        "switchToDe": "Switch language to German",
+        "switchToLight": "Switch to light mode",
+        "switchToDark": "Switch to dark mode",
+        "mapAlt": "Interactive culture map of Karlsruhe – click a region to view details",
+        "cardDetail": "Card detail view",
+        "cardImageAlt": "Detail image for selected card",
+        "close": "Close",
+        "chatLog": "Chat conversation"
         },
         "cardedit": {
           "edit": "Edit",
@@ -42,7 +55,10 @@
           "health": "Health",
           "gaming": "Gaming",
           "writing": "Writing",
-          "general_interest": "General"
+          "general_interest": "General",
+          "previousCard": "Go to previous card",
+          "nextCard": "Go to next card",
+          "cardImageAlt": "Card image: {name}"
         }
     },
     "de": {
@@ -52,16 +68,29 @@
         "typeYourMessage": "Was möchtest Du wissen?",
         "send": "Senden",
         "sourceCode": "Quellcode",
+        "sourceCodeLink": "Quellcode auf GitHub ansehen (öffnet in einem neuen Tab)",
         "home": "Start",
         "chat": "Chat",
         "about": "Über",
+        "aboutHeading": "Über dieses Projekt",
         "edit": "Bearbeiten",
         "username": "Benutzer",
         "passkey": "Passwort",
         "login": "Anmelden",
         "logout": "Abmelden",
         "welcome": "Willkommen zur Culture Map!",
-        "bot": "Bot"
+        "bot": "Bot",
+        "openMenu": "Navigationsmenü öffnen",
+        "closeMenu": "Navigationsmenü schließen",
+        "switchToEn": "Sprache auf Englisch wechseln",
+        "switchToDe": "Sprache auf Deutsch wechseln",
+        "switchToLight": "Hellen Modus aktivieren",
+        "switchToDark": "Dunklen Modus aktivieren",
+        "mapAlt": "Interaktive Kulturkarte von Karlsruhe – klicke auf einen Bereich, um Details anzuzeigen",
+        "cardDetail": "Kartendetailansicht",
+        "cardImageAlt": "Detailbild der ausgewählten Karte",
+        "close": "Schließen",
+        "chatLog": "Chatgespräch"
         },
         "cardedit": {
           "edit": "Bearbeiten",
@@ -88,7 +117,10 @@
           "health": "Gesundheit",
           "gaming": "Spielen",
           "writing": "Schreiben",
-          "general_interest": "Allgemein"
+          "general_interest": "Allgemein",
+          "previousCard": "Zur vorherigen Karte",
+          "nextCard": "Zur nächsten Karte",
+          "cardImageAlt": "Kartenbild: {name}"
         }
     }
 }

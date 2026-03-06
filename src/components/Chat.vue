@@ -75,12 +75,14 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="chat">
+  <!-- role="log" implies aria-live="polite" aria-atomic="false"; only newly appended content is announced -->
+  <div class="chat" role="log">
     <p v-for="(message, index) in messages" :key="index" :class="message.type">{{ message.text }}</p>
   </div>
   <div class="input-area">
-    <input type="text" :placeholder="$t('message.typeYourMessage')" v-model="query" />
-    <button @click="submit" >{{ $t("message.send") }}</button>
+    <label for="chat-input" class="visually-hidden">{{ $t('message.typeYourMessage') }}</label>
+    <input id="chat-input" type="text" :placeholder="$t('message.typeYourMessage')" v-model="query" @keydown.enter="submit" />
+    <button @click="submit" :aria-label="$t('message.send')">{{ $t("message.send") }}</button>
   </div>
 </template>
 
@@ -128,4 +130,15 @@ const submit = async () => {
   cursor: pointer;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 </style>    

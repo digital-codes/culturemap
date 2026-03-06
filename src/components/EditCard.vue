@@ -543,12 +543,12 @@ const fetchCard = async (cardName: string) => {
         <p>{{ $t('message.about') }}</p>
         -->
         <div class="cardview" v-if="loggedIn">
-            <button class="slide" @click="previous"><span class="icon">arrow_back</span></button>
-            <img :src="cardImage" alt="Group Image" class="cardimage" />
-            <button class="slide" @click="next"><span class="icon">arrow_forward</span></button>
+            <button class="slide" @click="previous" :aria-label="$t('cardedit.previousCard')"><span class="icon" aria-hidden="true">arrow_back</span></button>
+            <img :src="cardImage" :alt="$t('cardedit.cardImageAlt', { name: data_item.name || data_item.img })" class="cardimage" />
+            <button class="slide" @click="next" :aria-label="$t('cardedit.nextCard')"><span class="icon" aria-hidden="true">arrow_forward</span></button>
         </div>
         <div>
-            <button v-if="loggedIn" class="submit" @click="submit">{{ $t('message.send') }}</button>
+            <button v-if="loggedIn" class="submit" @click="submit" :aria-label="$t('message.send')">{{ $t('message.send') }}</button>
         </div>
         <json-forms class="login" :class="loggedIn? 'login_done' : 'login_pending'" :data="data_usr" :schema="schema_usr" :uischema="uischema_usr" :renderers="renderers"
             @change="onChangeUsr" />

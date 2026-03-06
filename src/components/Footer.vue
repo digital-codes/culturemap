@@ -3,12 +3,12 @@ import gh from "@primer/octicons/build/svg/mark-github-16.svg"
 
 </script>
 <template>
-    <div class="footer">
+    <footer class="footer">
         <hr>
         <p>{{ $t('message.stay tuned') }}</p>
-        <p class="sourcecode">{{ $t('message.sourceCode') }}:&nbsp; <a href="https://github.com/digital-codes/culturemap" target="_blank"><img :src="gh" alt="GitHub Logo" class="gh" ></a></p>
+        <p class="sourcecode">{{ $t('message.sourceCode') }}:&nbsp; <a href="https://github.com/digital-codes/culturemap" target="_blank" rel="noopener noreferrer" :aria-label="$t('message.sourceCodeLink')"><img :src="gh" alt="" class="gh" aria-hidden="true"></a></p>
         
-    </div>
+    </footer>
 </template>
 
 <style scoped>

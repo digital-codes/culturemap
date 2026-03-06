@@ -1,7 +1,7 @@
 <template>
-    <div class="header">
-        <p  v-if="route === 'chat'">Mapping Culture in Karlsruhe</p>
-    </div>
+    <header class="header">
+        <h1 v-if="route === 'chat'">Mapping Culture in Karlsruhe</h1>
+    </header>
 </template>
 
 <style scoped>

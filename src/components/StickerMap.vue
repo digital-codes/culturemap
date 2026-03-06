@@ -1,10 +1,28 @@
 <template>
     <div class="image-container" ref="container">
-        <img :src="mapImage" :class="['main-image', { 'square': isSquare }]" @load="onImageLoad" @click="handleMapClick"
-            ref="mapImageRef" />
-        <div v-if="cardImage" class="popover" :style="popoverStyle">
-            <button class="close-button" @click="closePopover">X</button>
-            <img :src="cardImage" class="popover-image" ref="cardImageRef" />
+        <img
+          :src="mapImage"
+          :class="['main-image', { 'square': isSquare }]"
+          @load="onImageLoad"
+          @click="handleMapClick"
+          @keydown.enter="handleMapKeydown"
+          @keydown.space.prevent="handleMapKeydown"
+          ref="mapImageRef"
+          :alt="$t('message.mapAlt')"
+          tabindex="0"
+        />
+        <div
+          v-if="cardImage"
+          class="popover"
+          :style="popoverStyle"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="$t('message.cardDetail')"
+        >
+            <button class="close-button" @click="closePopover" :aria-label="$t('message.close')">
+              <span aria-hidden="true">X</span>
+            </button>
+            <img :src="cardImage" class="popover-image" ref="cardImageRef" :alt="$t('message.cardImageAlt')" />
         </div>
     </div>
 </template>
@@ -158,6 +176,17 @@ const handleMapClick = (event:any) => {
     if (clickedIndex !== -1) {
         emit('open', clickedIndex);
     }
+};
+
+const handleMapKeydown = (_event: KeyboardEvent) => {
+    // Synthesize a click in the center of the focused image for keyboard activation
+    if (!mapImageRef.value) return;
+    const rect = mapImageRef.value.getBoundingClientRect();
+    const syntheticEvent = {
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2,
+    };
+    handleMapClick(syntheticEvent);
 };
 
 
