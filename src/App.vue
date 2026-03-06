@@ -208,8 +208,8 @@ const toggleTx = (enabled: boolean) => {
 <template>
   <div class="app">
     <Navbar @toggleTx="toggleTx" @route="goto" />
-    <Header :route="currentRoute" />
     <main id="main-content">
+      <Header :route="currentRoute" />
       <Chat v-if="currentRoute === 'chat'" />
       <EditCard v-if="currentRoute === 'edit'" :cards="targets.map(card => card.name)" />
       <About v-if="currentRoute === 'about'" />
@@ -227,14 +227,14 @@ const toggleTx = (enabled: boolean) => {
 </template>
 
 <style scoped>
-/* Push all route content below the fixed navbar (3rem tall) */
+/* Push all route content below the fixed navbar (3rem tall + padding) */
 #main-content {
-  padding-top: 3rem;
+  padding-top: 5.5rem; /* 3 + .5 + 2*1 for some breathing room */
 }
 
 @media screen and (max-width: 600px) {
   #main-content {
-    padding-top: 2rem;
+    padding-top: 3.5rem; /* 2 + .5 + 2*.5 for small screens */
   }
 }
 
