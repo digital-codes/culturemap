@@ -23,7 +23,26 @@ const { allMessages } = storeToRefs(chatStore)
 console.log('Initial messages:', allMessages.value)
 
 // ------------------
+const handleOrientationChange = () => {
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+  const wasSquare = useSquare.value;
+  useSquare.value = windowWidth <= windowHeight;
+  
+  if (wasSquare !== useSquare.value) {
+    console.log('Orientation change detected, loading appropriate rectangles and map');
+    if (useSquare.value) {
+      loadRectangles(squareCards);
+      mapImage.value = squareMap;
+    } else {
+      loadRectangles(rectCards);
+      mapImage.value = rectMap;
+    }
+  }
+};
 
+window.addEventListener('orientationchange', handleOrientationChange);
+window.addEventListener('resize', handleOrientationChange);
 
 const squareMap = "/img/map/stickers_square.png";
 const rectMap = "/img/map/stickers_rect.png";

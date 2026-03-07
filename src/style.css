@@ -1,8 +1,16 @@
 
+/*
 @import "@fontsource-variable/tektur";
+default tekture ahs too many styles (greek, cyrilic etc). create custom css in assets folder with only latin styles to reduce file size and load time
+*/
+@import "./assets/fonts/tektur.css";
+
 @import "@fontsource/faster-one";
+/*
 @import "@fontsource/audiowide";
+*/
 @import "@fontsource/material-icons-round";
+
 
 :root {
   font-family: "Tektur Variable"; /*system-ui, Avenir, Helvetica, Arial, sans-serif;*/

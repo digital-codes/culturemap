@@ -71,6 +71,7 @@ const menuActions = [
 
 <style scoped>
 
+
 .navbar {
     position: fixed;
     top: 0;
