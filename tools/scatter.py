@@ -138,8 +138,13 @@ def main(args):
     with open(f"{output_base}.json", "w") as f:
         json.dump(stickers, f, indent=4)
         
-
-    geo_bbox = [49.04091, 8.30584, 48.98788,8.49089]  # [min_lat, min_lon, max_lat, max_lon]
+    if not square:
+        geo_bbox = [49.04091, 8.30584, 48.98788,8.49089]  # [min_lat, min_lon, max_lat, max_lon]
+    else:
+        # rect image is 3000*1678. square image is 1678*1678. So we need to adjust the geo bbox accordingly
+        xratio = 1678/3000
+        xdelta = (8.49089 - 8.30584) * xratio / 2
+        geo_bbox = [49.04091, 8.30584 + xdelta, 48.98788, 8.49089 - xdelta]  # [min_lat, min_lon, max_lat, max_lon]
     def pixel_to_geo(pixel_pos, map_dimensions, bbox):
         """Convert pixel coordinates to geographic coordinates"""
         map_width, map_height = map_dimensions
