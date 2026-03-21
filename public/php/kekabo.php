@@ -8,6 +8,10 @@ function getEvents($start, $end)
     // Construct the API URL for fetching events
     $api_url = $base_url . "/api/events?start=" . $start . "&end=" . $end . "&show_recurrent=true";
 
+    // ics feed, alternative:
+    // https://keepkarlsruheboring.org/feed/ics?show_recurrent=true
+
+
     // Initialize cURL session
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $api_url);
