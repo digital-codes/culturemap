@@ -235,7 +235,7 @@ const handleMapKeydown = (_event: KeyboardEvent) => {
     border: solid 2px red;
     font-size: 16px;
     cursor: pointer;
-    z-index: 100;
+    z-index: 9999;
 }
 
 @media screen and (max-width: 1400px) {

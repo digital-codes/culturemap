@@ -40,8 +40,8 @@ default tekture ahs too many styles (greek, cyrilic etc). create custom css in a
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-primary: #646cff;
-    --color-secondary: #535bf2;
+    --color-primary: #a4acff;
+    --color-secondary: #939bf2;
     --color-text: rgba(255, 255, 255, 0.87);
     --color-background: #242424;
     --color-surface: #1a1a1a;
@@ -53,8 +53,11 @@ default tekture ahs too many styles (greek, cyrilic etc). create custom css in a
 
 /* Dark mode class override */
 :root.dark {
+  --color-primary: #a4acff;
+  --color-secondary: #939bf2;
   --color-text: rgba(255, 255, 255, 0.87);
   --color-background: #242424;
+  --color-border: #333333;
   --color-surface: #1a1a1a;
   --color-accent: #b09030;
   --color-accent-hover: #a0ca40;
@@ -62,9 +65,14 @@ default tekture ahs too many styles (greek, cyrilic etc). create custom css in a
 
 /* Light mode class override */
 :root.light {
+  --color-primary: #646cff;
+  --color-secondary: #535bf2;
   --color-text: #213547;
+  --color-accent: #806010;
+  --color-accent-hover: #a0a020;
   --color-background: #ffffff;
   --color-surface: #f9f9f9;
+  --color-border: #e0e0e0;
 }
 
 a {
