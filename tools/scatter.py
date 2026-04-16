@@ -186,5 +186,6 @@ def main(args):
         json.dump(geojson, f, indent=2)
         
 if __name__ == "__main__":
+    """Example: python scatter.py -c ../public/img/card/ -m ../public/img/map/map_original_blank_large.png -o stickers_square -s """
     import sys
     main(sys.argv[1:])
