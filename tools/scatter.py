@@ -29,11 +29,14 @@ def get_map(map_path,square=False):
     #map_width, map_height = map_img.size
     # return img.size  # Returns (width, height)
 
-def distribute_stickers(num_stickers, map_width, map_height):
+def distribute_stickers(num_stickers, map_width, map_height, sticker_dims=-1):
     # Generate random positions for stickers
     np.random.seed(42)  # For reproducibility
     # Calculate sticker size based on map dimensions and number of stickers
-    sticker_size = min(map_width, map_height) // 14  # Adjust divisor to change sticker size
+    if sticker_dims > 0:
+        sticker_size = sticker_dims
+    else:
+        sticker_size = min(map_width, map_height) // 14  # Adjust divisor to change sticker size
     min_distance = sticker_size * .9  # Minimum distance between stickers based on size
     # positions, shift down by half sticker size to center them
     sticker_positions = np.random.rand(num_stickers, 2) * [map_width - sticker_size, map_height - sticker_size] + sticker_size / 4
@@ -104,6 +107,7 @@ def main(args):
     parser.add_argument("-b", "--bbox", action="store_true", help="card bounding box")
     parser.add_argument("-s", "--square", action="store_true", help="Generate square map")
     parser.add_argument("-n", "--num-stickers", type=int, default=-1, help="Number of stickers to distribute, -1 for all")
+    parser.add_argument("-d", "--dims", type=int, default=-1, help="Dimensions for the stickers, default -1, then use function internals")
     parsed = parser.parse_args(args)
 
     sticker_dir = parsed.card_dir
@@ -119,7 +123,7 @@ def main(args):
 
     map_img = get_map(map_path, square=square)
     map_width, map_height = map_img.size
-    sticker_positions, sticker_size = distribute_stickers(num_stickers, map_width, map_height)
+    sticker_positions, sticker_size = distribute_stickers(num_stickers, map_width, map_height, sticker_dims=parsed.dims)
     sticker_angles = [random.uniform(-30, 30) for _ in range(len(sticker_positions))]
     sticker_boxes = plot_stickers(sticker_positions, sticker_angles, sticker_paths, sticker_size, map_img, cardBox=cardBox, output_path=f"{output_base}.png")
 
@@ -186,6 +190,6 @@ def main(args):
         json.dump(geojson, f, indent=2)
         
 if __name__ == "__main__":
-    """Example: python scatter.py -c ../public/img/card/ -m ../public/img/map/map_original_blank_large.png -o stickers_square -s """
+    """Example: python scatter.py -c ../public/img/card/ -m ../public/img/map/map_original_blank_large.png -o stickers_square -s -d 96"""
     import sys
     main(sys.argv[1:])
