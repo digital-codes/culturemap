@@ -93,6 +93,8 @@ def plot_stickers(sticker_positions, angles, sticker_paths, sticker_size, map_im
             print(f"Error processing sticker {sticker_path}: {e}")
 
     result_img.save(output_path)
+    result_img.save(output_path.replace(".png", ".jpg"))
+    result_img.save(output_path.replace(".png", ".webp"))
     return bboxes
 
 

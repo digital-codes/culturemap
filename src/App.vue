@@ -33,10 +33,10 @@ const handleOrientationChange = () => {
     console.log('Orientation change detected, loading appropriate rectangles and map');
     if (useSquare.value) {
       loadRectangles(squareCards);
-      mapImage.value = squareMap;
+      mapImage.value = squareMapBase;
     } else {
       loadRectangles(rectCards);
-      mapImage.value = rectMap;
+      mapImage.value = rectMapBase;
     }
   }
 };
@@ -44,11 +44,12 @@ const handleOrientationChange = () => {
 window.addEventListener('orientationchange', handleOrientationChange);
 window.addEventListener('resize', handleOrientationChange);
 
-const squareMap = "/img/map/stickers_square.png";
-const rectMap = "/img/map/stickers_rect.png";
+// map without extension 
+const squareMapBase = "/img/map/stickers_square";
+const rectMapBase = "/img/map/stickers_rect";
 const squareCards = "/data/stickers_square.json";
 const rectCards = "/data/stickers_rect.json";
-const mapImage = ref(squareMap);
+const mapImage = ref(squareMapBase);
 
 // define the types for the rectangles
 interface Rectangle {
@@ -152,10 +153,10 @@ onMounted(async () => {
   try {
     if (useSquare.value) {
       await loadRectangles(squareCards);
-      mapImage.value = squareMap;
+      mapImage.value = squareMapBase;
     } else {
       await loadRectangles(rectCards);
-      mapImage.value = rectMap;
+      mapImage.value = rectMapBase;
     }
   } catch (error) {
     console.error('Error loading rectangles:', error);

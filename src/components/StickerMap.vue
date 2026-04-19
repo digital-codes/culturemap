@@ -1,7 +1,8 @@
 <template>
     <div class="image-container" ref="container">
+        <!--    
         <img
-          :src="mapImage"
+          :src="mapImage + '.webp'"
           :class="['main-image', { 'square': isSquare }]"
           @load="onImageLoad"
           @click="handleMapClick"
@@ -11,6 +12,23 @@
           :alt="$t('message.mapAlt')"
           tabindex="0"
         />
+    -->
+        <picture>
+            <source :srcset="mapImage + '.webp'" type="image/webp">
+            <source :srcset="mapImage + '.jpg'" type="image/jpeg">
+            <source :srcset="mapImage + '.png'" type="image/png">
+            <img
+                :src="mapImage + '.png'"
+                :class="['main-image', { 'square': isSquare }]"
+                @load="onImageLoad"
+                @click="handleMapClick"
+                @keydown.enter="handleMapKeydown"
+                @keydown.space.prevent="handleMapKeydown"
+                ref="mapImageRef"
+                :alt="$t('message.mapAlt')"
+                tabindex="0"
+            />
+        </picture>
         <div
           v-if="cardImage"
           class="popover"
