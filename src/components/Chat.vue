@@ -13,38 +13,47 @@ const { messages } = storeToRefs(chatStore)
 console.log('Initial messages in Chat.vue:', messages.value)
 
 const query = ref('');
+const isLoading = ref(false);
+const error = ref('');
 
 const sessionId = ref(chatStore.getSessionId);
 const conversationId = ref(chatStore.getConvId);
 
 watch(i18n.locale, (newLocale) => {
   console.log('Language changed to:', newLocale);
-  // Optionally, you can also reset the chat or send a system message about the language change
   messages.value = [];
   sessionId.value = null;
   conversationId.value = null;
+  error.value = '';
 });
 
 
 const submit = async () => {
-  // Placeholder for submit logic
-  console.log('Submit button clicked', query.value);
+  const trimmedQuery = query.value.trim();
+  
+  if (!trimmedQuery) {
+    error.value = i18n.t('message.enterMessage');
+    return;
+  }
+
+  error.value = '';
+  isLoading.value = true;
+
   try {
     const response = await fetch('/php/chat.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        query: query.value,
+        query: trimmedQuery,
         lang: i18n.locale.value,
-        session: sessionId.value != '' ? sessionId.value : undefined,
-        conversation_id: conversationId.value != '' ? conversationId.value : undefined
+        session: sessionId.value !== '' && sessionId.value ? sessionId.value : undefined,
+        conversation_id: conversationId.value !== '' && conversationId.value ? conversationId.value : undefined
       })
     });
     const data = await response.json();
     console.log('Response from server:', data);
     if (!response.ok) {
-      console.error('Server error:', data.error || response.statusText);
-      throw new Error(data.error || 'Server error');
+      throw new Error(data.error || i18n.t('message.serverError') || response.statusText);
     }
     if (data.error) {
       throw new Error("Error: " + data.error);
@@ -58,16 +67,19 @@ const submit = async () => {
       conversationId.value = data.conversation_id;
       chatStore.setConvId(data.conversation_id);
     }
-    chatStore.append({ type: 'question', text: query.value });
-    chatStore.append({ type: 'answer', text: data.text || 'No response from server.' });
+    chatStore.append({ type: 'question', text: trimmedQuery });
+    chatStore.append({ type: 'answer', text: data.text || i18n.t('message.noResponse') || 'No response from server.' });
   } catch (error) {
     console.error('Error submitting query:', error);
-  }
-  query.value = '';
-  await nextTick();
-  const chatElement = document.querySelector('.chat');
-  if (chatElement) {
-    chatElement.scrollTop = chatElement.scrollHeight;
+    error.value = error.message;
+  } finally {
+    isLoading.value = false;
+    query.value = '';
+    await nextTick();
+    const chatElement = document.querySelector('.chat');
+    if (chatElement) {
+      chatElement.scrollTop = chatElement.scrollHeight;
+    }
   }
 };
 
@@ -81,9 +93,25 @@ const submit = async () => {
   </div>
   <div class="input-area">
     <label for="chat-input" class="visually-hidden">{{ $t('message.typeYourMessage') }}</label>
-    <input id="chat-input" type="text" :placeholder="$t('message.typeYourMessage')" v-model="query" @keydown.enter="submit" />
-    <button @click="submit" :aria-label="$t('message.send')">{{ $t("message.send") }}</button>
+    <input 
+      id="chat-input" 
+      type="text" 
+      :placeholder="$t('message.typeYourMessage')" 
+      v-model="query" 
+      @keydown.enter.prevent="submit"
+      :disabled="isLoading"
+    />
+    <button
+      @click="submit"
+      :aria-label="$t('message.send')"
+      :disabled="isLoading || !query.trim()"
+      :class="{ 'loading': isLoading }"
+    >
+      <span v-if="isLoading" class="spinner" aria-hidden="true"></span>
+      <span v-else>{{ $t("message.send") }}</span>
+    </button>
   </div>
+  <div v-if="error" role="alert" class="error">{{ error }}</div>
 </template>
 
 <style scoped>
@@ -93,33 +121,37 @@ const submit = async () => {
   background-color: var(--color-surface);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0,  0, 0.1);
-  overflow:scroll;
+  overflow: scroll;
   height: 40vh;
 }
 .answer {
   color: var(--color-primary);
   margin-bottom: .2rem;
   margin-left: 2rem;
-  width:80%;
+  width: 80%;
 }
 .question {
   color: var(--color-text);
   font-weight: bold;
   margin-right: .2rem;
-  width:80%;
+  width: 80%;
 }
 
 .input-area {
   display: flex;
   gap: .5rem;
   margin: 1rem auto;
-  width:80%;
+  width: 80%;
 }
 .input-area input {
   flex: 1;
   padding: .5rem;
   border: 1px solid var(--color-border);
   border-radius: 4px;
+}
+.input-area input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .input-area button {
   padding: .5rem 1rem;
@@ -128,6 +160,40 @@ const submit = async () => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+.input-area button:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  opacity: 0.9;
+}
+.input-area button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.input-area button:disabled {
+  background-color: var(--color-border);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.input-area button.loading {
+  background-color: var(--color-border);
+}
+
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
 }
 
 .visually-hidden {
@@ -141,4 +207,10 @@ const submit = async () => {
   white-space: nowrap;
   border: 0;
 }
-</style>    
+
+.error {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+</style>
